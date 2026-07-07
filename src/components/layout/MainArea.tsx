@@ -1,0 +1,58 @@
+import { useQueryClient } from "@tanstack/react-query";
+import { Topbar } from "./Topbar";
+import { FileGrid } from "../../features/files/FileGrid";
+import { UploadDropzone } from "../../features/files/UploadDropzone";
+import { useFolderContents } from "../../features/folders/useFolderContents";
+import { uploadFile } from "../../features/files/fileApi";
+import type { Folder } from "../../types/domain";
+
+export function MainArea({
+  path,
+  ownerId,
+  restrictRootToOwner,
+  rootLabel,
+  onNavigate,
+}: {
+  path: Folder[];
+  ownerId: string;
+  restrictRootToOwner?: boolean;
+  rootLabel?: string;
+  onNavigate: (path: Folder[]) => void;
+}) {
+  const currentFolderId = path.length ? path[path.length - 1].id : null;
+  const { folders, files, isLoading } = useFolderContents(
+    currentFolderId,
+    restrictRootToOwner ? ownerId : undefined,
+  );
+  const queryClient = useQueryClient();
+
+  async function handleUpload(fileList: FileList) {
+    for (const file of Array.from(fileList)) {
+      await uploadFile(file, currentFolderId, ownerId);
+    }
+    queryClient.invalidateQueries({ queryKey: ["files", currentFolderId] });
+    queryClient.invalidateQueries({ queryKey: ["storageUsage"] });
+  }
+
+  return (
+    <div className="flex flex-1 flex-col overflow-hidden">
+      <Topbar path={path} onNavigate={onNavigate} rootLabel={rootLabel} />
+
+      <UploadDropzone onUpload={handleUpload}>
+        <div className="p-6">
+          {isLoading ? (
+            <p className="eyebrow text-brand-gray">Carregando…</p>
+          ) : (
+            <FileGrid
+              folders={folders}
+              files={files}
+              currentFolderId={currentFolderId}
+              currentUserId={ownerId}
+              onOpenFolder={(folder) => onNavigate([...path, folder])}
+            />
+          )}
+        </div>
+      </UploadDropzone>
+    </div>
+  );
+}
