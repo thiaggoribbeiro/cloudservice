@@ -20,6 +20,11 @@ import { ROLE_LABEL } from "../../lib/roleLabels";
 
 const ASSIGNABLE_ROLES: Exclude<UserRole, "admin">[] = ["user", "guest", "manager"];
 
+// Sentinel folder-select value meaning "create the guest without folder access
+// now, share a folder with them separately afterwards" - distinct from the
+// unselected placeholder, which still forces an explicit choice.
+const NO_FOLDER = "__none__";
+
 export function MembersView({
   currentUserId,
   currentUserEmail,
@@ -62,7 +67,7 @@ export function MembersView({
     <div className="flex flex-1 flex-col overflow-hidden">
       <Topbar path={[]} onNavigate={() => {}} title="Membros" />
 
-      <div className="flex items-center justify-between border-b border-brand-border px-6 py-3">
+      <div className="flex items-center justify-between border-b border-brand-border px-6 py-3 dark:border-white/10">
         <p className="mono-tag text-xs text-brand-gray">
           {members.length} {members.length === 1 ? "membro cadastrado" : "membros cadastrados"}
         </p>
@@ -83,16 +88,16 @@ export function MembersView({
               return (
                 <div
                   key={member.id}
-                  className="flex items-center justify-between rounded-lg border border-brand-border px-4 py-3"
+                  className="flex items-center justify-between rounded-lg border border-brand-border px-4 py-3 dark:border-white/10 dark:bg-white/[0.04]"
                 >
                   <div className="flex min-w-0 flex-col">
-                    <span className="truncate text-sm font-medium text-brand-black">
+                    <span className="truncate text-sm font-medium text-brand-black dark:text-white">
                       {member.display_name || member.email}
                     </span>
                     <span className="mono-tag truncate text-[11px] text-brand-gray">{member.email}</span>
                   </div>
                   <div className="flex shrink-0 items-center gap-3">
-                    <span className="eyebrow rounded-full border border-brand-border px-2.5 py-1 text-brand-primary">
+                    <span className="eyebrow rounded-full border border-brand-border px-2.5 py-1 text-brand-primary dark:border-white/15">
                       {ROLE_LABEL[member.role]}
                     </span>
                     {canManage && (
@@ -107,7 +112,7 @@ export function MembersView({
                         <button
                           type="button"
                           onClick={() => setDeleteTarget(member)}
-                          className="text-sm text-brand-gray hover:text-brand-black hover:underline"
+                          className="text-sm text-brand-gray hover:text-brand-black hover:underline dark:hover:text-white"
                         >
                           Excluir
                         </button>
@@ -194,7 +199,7 @@ function CreateMemberDialog({
         email: email.trim(),
         display_name: displayName.trim(),
         role,
-        folder_id: role === "guest" ? folderId : undefined,
+        folder_id: role === "guest" && folderId !== NO_FOLDER ? folderId : undefined,
       }),
     onSuccess: onCreated,
     onError: (err: Error) => setError(err.message || "Nao foi possivel criar o membro."),
@@ -208,7 +213,7 @@ function CreateMemberDialog({
       return;
     }
     if (role === "guest" && !folderId) {
-      setError("Selecione a pasta que o convidado ira acessar.");
+      setError("Selecione uma pasta ou \"Nenhuma\" para o convidado.");
       return;
     }
     createMutation.mutate();
@@ -259,6 +264,7 @@ function CreateMemberDialog({
             <label className="eyebrow text-brand-gray">Pasta compartilhada</label>
             <select value={folderId} onChange={(e) => setFolderId(e.target.value)} className="field-input">
               <option value="">Selecione uma pasta…</option>
+              <option value={NO_FOLDER}>Nenhuma</option>
               {folders.map((f) => (
                 <option key={f.id} value={f.id}>
                   {currentUserRole === "admin" ? `${f.name} — ${f.owner_email}` : f.name}
@@ -362,7 +368,7 @@ function EditMemberDialog({
           {updateMutation.isPending ? "Salvando…" : "Salvar alteracoes"}
         </button>
 
-        <div className="border-t border-brand-border pt-4">
+        <div className="border-t border-brand-border pt-4 dark:border-white/10">
           <button
             type="button"
             onClick={() => {
@@ -402,12 +408,12 @@ function TemporaryPasswordDialog({
     <Modal title="Senha provisoria" onClose={onClose}>
       <div className="flex flex-col gap-4">
         <p className="text-sm text-brand-gray">
-          Repasse esta senha provisoria para <span className="font-medium text-brand-black">{result.email}</span>.
+          Repasse esta senha provisoria para <span className="font-medium text-brand-black dark:text-white">{result.email}</span>.
           Ao entrar com ela, sera solicitada a criacao de uma nova senha.
         </p>
 
-        <div className="flex items-center justify-between gap-2 rounded-lg border border-brand-border bg-brand-pale/30 px-4 py-3">
-          <span className="mono-tag text-base text-brand-black">{result.temporary_password}</span>
+        <div className="flex items-center justify-between gap-2 rounded-lg border border-brand-border bg-brand-pale/30 px-4 py-3 dark:border-white/10 dark:bg-white/[0.06]">
+          <span className="mono-tag text-base text-brand-black dark:text-white">{result.temporary_password}</span>
           <button type="button" onClick={copy} className="btn-ghost shrink-0 px-3 py-1.5 text-sm">
             {copied ? "Copiado!" : "Copiar"}
           </button>

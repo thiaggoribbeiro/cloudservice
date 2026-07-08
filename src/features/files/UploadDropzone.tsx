@@ -36,8 +36,8 @@ export function UploadDropzone({
     >
       {children}
       {isDragging && (
-        <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-white/85 backdrop-blur-sm">
-          <div className="rounded-2xl border-2 border-dashed border-brand-primary bg-brand-pale/50 px-10 py-8 text-center">
+        <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-white/85 backdrop-blur-sm dark:bg-black/85">
+          <div className="rounded-2xl border-2 border-dashed border-brand-primary bg-brand-pale/50 px-10 py-8 text-center dark:bg-white/5">
             <p className="text-2xl font-bold text-brand-primary">Solte os arquivos aqui</p>
             <p className="eyebrow mt-1 text-brand-primary/70">Envio para a pasta atual</p>
           </div>

@@ -26,3 +26,4 @@ dist-ssr
 # Local Claude Code tooling (agent settings, unrelated reference clone)
 .claude/
 claude-code-main/
+skills-main/

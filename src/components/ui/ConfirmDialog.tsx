@@ -15,7 +15,7 @@ export function ConfirmDialog({
 }) {
   return (
     <Modal title={title} onClose={onClose}>
-      <p className="text-sm leading-relaxed text-brand-black">{message}</p>
+      <p className="text-sm leading-relaxed text-brand-black dark:text-white">{message}</p>
       <div className="mt-5 flex justify-end gap-2">
         <button type="button" onClick={onClose} className="btn-ghost border-transparent">
           Cancelar

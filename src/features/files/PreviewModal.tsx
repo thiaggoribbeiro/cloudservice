@@ -27,7 +27,7 @@ export function PreviewModal({ file, onClose }: { file: FileRow; onClose: () => 
 
   return (
     <Modal title={file.name} onClose={onClose}>
-      <div className="flex max-h-[70vh] min-h-[200px] items-center justify-center overflow-auto rounded-lg bg-brand-pale/25">
+      <div className="flex max-h-[70vh] min-h-[200px] items-center justify-center overflow-auto rounded-lg bg-brand-pale/25 dark:bg-white/5">
         {error && <p className="text-sm text-brand-primary">Nao foi possivel carregar a pre-visualizacao.</p>}
         {!error && !url && <p className="text-brand-gray">Carregando...</p>}
         {!error && url && isImage && (

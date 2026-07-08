@@ -24,7 +24,7 @@ function FolderTreeNode({
         <button
           type="button"
           onClick={() => setExpanded((e) => !e)}
-          className="flex w-4 shrink-0 items-center justify-center text-brand-black/40 hover:text-brand-black"
+          className="flex w-4 shrink-0 items-center justify-center text-brand-black/40 hover:text-brand-black dark:text-white/40 dark:hover:text-white"
           aria-label={expanded ? "Recolher" : "Expandir"}
         >
           <span
@@ -38,15 +38,15 @@ function FolderTreeNode({
           onClick={() => onNavigate(path)}
           className={`relative flex-1 truncate rounded-md py-1.5 pl-2 pr-2 text-left text-[0.85rem] transition-colors ${
             isActive
-              ? "bg-white font-semibold text-brand-primary shadow-sm"
-              : "text-brand-black/65 hover:bg-white/60 hover:text-brand-black"
+              ? "bg-white font-semibold text-brand-primary shadow-sm dark:bg-white/12 dark:text-white dark:shadow-none"
+              : "text-brand-black/65 hover:bg-black/5 hover:text-brand-black dark:text-white/65 dark:hover:bg-white/10 dark:hover:text-white"
           }`}
         >
           {folder.name}
         </button>
       </div>
       {expanded && (
-        <div className="ml-2 border-l border-brand-black/10 pl-2">
+        <div className="ml-2 border-l border-black/10 pl-2 dark:border-white/15">
           {children?.map((child) => (
             <FolderTreeNode
               key={child.id}

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Folder, FileRow } from "../../types/domain";
-import { formatBytes, fileIconFor, isPreviewable } from "../../lib/format";
+import { formatBytes, isPreviewable, formatRelativeTime } from "../../lib/format";
+import { FileTypeIcon } from "../../components/ui/FileTypeIcon";
 import { downloadFile, renameFile, moveFile } from "./fileApi";
 import { renameFolder, moveFolder } from "../folders/folderApi";
 import { softDeleteFolder, softDeleteFile } from "../trash/trashApi";
@@ -53,7 +54,7 @@ function ItemMenu({
   return (
     <div
       data-item-menu
-      className="stagger-0 absolute right-2 top-11 z-10 w-48 overflow-hidden rounded-lg border border-brand-border bg-white py-1 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.35)]"
+      className="stagger-0 absolute right-2 top-full z-10 mt-1 w-48 overflow-hidden rounded-lg border border-brand-border bg-white py-1 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.35)] dark:border-white/10 dark:bg-dark-surface"
       onClick={(e) => e.stopPropagation()}
     >
       {onDownload && (
@@ -63,7 +64,7 @@ function ItemMenu({
             onDownload();
             onClose();
           }}
-          className="block w-full px-3.5 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50"
+          className="block w-full px-3.5 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
         >
           Baixar
         </button>
@@ -74,7 +75,7 @@ function ItemMenu({
           onToggleFavorite();
           onClose();
         }}
-        className="block w-full px-3.5 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50"
+        className="block w-full px-3.5 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
       >
         {isFavorited ? "Remover dos favoritos" : "Favoritar"}
       </button>
@@ -84,7 +85,7 @@ function ItemMenu({
           onShare();
           onClose();
         }}
-        className="block w-full px-3.5 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50"
+        className="block w-full px-3.5 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
       >
         Compartilhar
       </button>
@@ -94,7 +95,7 @@ function ItemMenu({
           onRename();
           onClose();
         }}
-        className="block w-full px-3.5 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50"
+        className="block w-full px-3.5 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
       >
         Renomear
       </button>
@@ -104,18 +105,18 @@ function ItemMenu({
           onMove();
           onClose();
         }}
-        className="block w-full px-3.5 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50"
+        className="block w-full px-3.5 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
       >
         Mover
       </button>
-      <div className="my-1 border-t border-brand-border" />
+      <div className="my-1 border-t border-brand-border dark:border-white/10" />
       <button
         type="button"
         onClick={() => {
           onDelete();
           onClose();
         }}
-        className="block w-full px-3.5 py-2 text-left text-sm text-brand-primary transition-colors hover:bg-brand-pale/50"
+        className="block w-full px-3.5 py-2 text-left text-sm text-brand-primary transition-colors hover:bg-brand-pale/50 dark:hover:bg-white/10"
       >
         Mover para lixeira
       </button>
@@ -203,22 +204,28 @@ export function FileGrid({
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+      <div className="flex items-center gap-3 px-4 pb-2">
+        <span className="eyebrow flex-1 text-brand-gray">Nome</span>
+        <span className="eyebrow hidden w-28 shrink-0 text-right text-brand-gray sm:block">Modificado</span>
+        <span className="eyebrow hidden w-20 shrink-0 text-right text-brand-gray sm:block">Tamanho</span>
+        <span className="w-7 shrink-0" />
+      </div>
+
+      <div className="file-list">
         {folders.map((folder) => (
-          <div
-            key={folder.id}
-            className="tile group"
-            onDoubleClick={() => onOpenFolder(folder)}
-          >
-            <span className="tile-icon text-brand-primary">📁</span>
-            {favoriteIds?.folderIds.has(folder.id) && (
-              <StarIcon
-                className="absolute left-2 top-2 h-3.5 w-3.5 text-brand-primary"
-                fill="currentColor"
-              />
-            )}
-            <span className="w-full truncate text-center text-sm font-medium text-brand-black">
-              {folder.name}
+          <div key={folder.id} className="file-row group" onDoubleClick={() => onOpenFolder(folder)}>
+            <span className="file-row-icon text-brand-primary">📁</span>
+            <span className="flex min-w-0 flex-1 items-center gap-1.5">
+              {favoriteIds?.folderIds.has(folder.id) && (
+                <StarIcon className="h-3.5 w-3.5 shrink-0 text-brand-primary" fill="currentColor" />
+              )}
+              <span className="truncate text-sm font-medium text-brand-black dark:text-white">{folder.name}</span>
+            </span>
+            <span className="mono-tag hidden w-28 shrink-0 text-right text-[12px] text-brand-gray sm:block">
+              {formatRelativeTime(folder.updated_at)}
+            </span>
+            <span className="mono-tag hidden w-20 shrink-0 text-right text-[12px] text-brand-gray sm:block">
+              —
             </span>
             <button
               type="button"
@@ -227,7 +234,7 @@ export function FileGrid({
                 setOpenMenuId(openMenuId === folder.id ? null : folder.id);
               }}
               data-item-menu-trigger
-              className="absolute right-1.5 top-1.5 rounded-md px-1.5 py-0.5 text-brand-gray opacity-0 transition-opacity hover:bg-brand-pale/60 group-hover:opacity-100"
+              className="shrink-0 rounded-md px-1.5 py-0.5 text-brand-gray opacity-0 transition-opacity hover:bg-brand-pale/60 group-hover:opacity-100 dark:hover:bg-white/10"
               aria-label="Mais opcoes"
             >
               ⋮
@@ -248,22 +255,24 @@ export function FileGrid({
         {files.map((file) => (
           <div
             key={file.id}
-            className="tile group"
+            className="file-row group"
             onDoubleClick={() =>
               isPreviewable(file.mime_type) ? setDialog({ kind: "preview", file }) : downloadFile(file)
             }
           >
-            <span className="tile-icon">{fileIconFor(file.mime_type)}</span>
-            {favoriteIds?.fileIds.has(file.id) && (
-              <StarIcon
-                className="absolute left-2 top-2 h-3.5 w-3.5 text-brand-primary"
-                fill="currentColor"
-              />
-            )}
-            <span className="w-full truncate text-center text-sm font-medium text-brand-black">
-              {file.name}
+            <FileTypeIcon name={file.name} mimeType={file.mime_type} className="h-9 w-9 shrink-0 rounded-lg" />
+            <span className="flex min-w-0 flex-1 items-center gap-1.5">
+              {favoriteIds?.fileIds.has(file.id) && (
+                <StarIcon className="h-3.5 w-3.5 shrink-0 text-brand-primary" fill="currentColor" />
+              )}
+              <span className="truncate text-sm font-medium text-brand-black dark:text-white">{file.name}</span>
             </span>
-            <span className="mono-tag text-[11px] text-brand-gray">{formatBytes(file.size_bytes)}</span>
+            <span className="mono-tag hidden w-28 shrink-0 text-right text-[12px] text-brand-gray sm:block">
+              {formatRelativeTime(file.updated_at)}
+            </span>
+            <span className="mono-tag hidden w-20 shrink-0 text-right text-[12px] text-brand-gray sm:block">
+              {formatBytes(file.size_bytes)}
+            </span>
             <button
               type="button"
               onClick={(e) => {
@@ -271,7 +280,7 @@ export function FileGrid({
                 setOpenMenuId(openMenuId === file.id ? null : file.id);
               }}
               data-item-menu-trigger
-              className="absolute right-1.5 top-1.5 rounded-md px-1.5 py-0.5 text-brand-gray opacity-0 transition-opacity hover:bg-brand-pale/60 group-hover:opacity-100"
+              className="shrink-0 rounded-md px-1.5 py-0.5 text-brand-gray opacity-0 transition-opacity hover:bg-brand-pale/60 group-hover:opacity-100 dark:hover:bg-white/10"
               aria-label="Mais opcoes"
             >
               ⋮

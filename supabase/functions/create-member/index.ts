@@ -122,9 +122,6 @@ Deno.serve(async (req: Request) => {
     if (!ASSIGNABLE_ROLES.includes(role)) {
       return json({ error: "Papel invalido" }, 400);
     }
-    if (role === "guest" && !folder_id) {
-      return json({ error: "Selecione uma pasta para o convidado acessar" }, 400);
-    }
 
     if (folder_id) {
       const { data: folder, error: folderError } = await admin

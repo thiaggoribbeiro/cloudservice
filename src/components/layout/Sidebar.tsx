@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { FolderTree } from "../../features/folders/FolderTree";
 import { StorageUsageIndicator } from "../../features/storageUsage/StorageUsageIndicator";
+import { CreateFolderDialog } from "../../features/folders/CreateFolderDialog";
+import { ShareDialog } from "../../features/sharing/ShareDialog";
 import { uploadFile, uploadFolderFiles } from "../../features/files/fileApi";
 import {
   PlusIcon,
@@ -33,8 +34,8 @@ function NavRow({
       onClick={onClick}
       className={`relative flex w-full items-center gap-2.5 rounded-md py-2 pl-3 pr-2 text-left text-[0.9rem] transition-colors ${
         active
-          ? "bg-white font-semibold text-brand-primary shadow-sm"
-          : "text-brand-black/70 hover:bg-white/60 hover:text-brand-black"
+          ? "bg-white font-semibold text-brand-primary shadow-sm dark:bg-white/12 dark:text-white dark:shadow-none"
+          : "text-brand-black/70 hover:bg-black/5 hover:text-brand-black dark:text-white/75 dark:hover:bg-white/10 dark:hover:text-white"
       }`}
     >
       {active && (
@@ -76,6 +77,9 @@ export function Sidebar({
   const canManageMembers = role === "admin" || role === "manager";
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showCreateFolder, setShowCreateFolder] = useState(false);
+  const [showCreateSharedFolder, setShowCreateSharedFolder] = useState(false);
+  const [shareTarget, setShareTarget] = useState<Folder | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
@@ -114,15 +118,17 @@ export function Sidebar({
     invalidateAfterUpload();
   }
 
+  const createFolderInvalidateKeys = [["folderChildren", uploadTargetFolderId]];
+
   return (
-    <aside className="flex w-64 shrink-0 flex-col bg-brand-border pt-4">
+    <aside className="flex w-64 shrink-0 flex-col bg-light-canvas pt-4 dark:bg-dark-canvas">
       {!isGuest && (
         <div className="relative px-3 pb-4">
           <button
             type="button"
             data-item-menu-trigger
             onClick={() => setMenuOpen((o) => !o)}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-brand-primary shadow-sm transition-transform hover:-translate-y-px hover:shadow-md"
+            className="flex w-4/5 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-linear-to-br from-brand-secondary to-[#7f3712] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:-translate-y-px hover:shadow-md"
           >
             <PlusIcon className="h-4 w-4" />
             Criar ou carregar
@@ -131,7 +137,7 @@ export function Sidebar({
           {menuOpen && (
             <div
               data-item-menu
-              className="stagger-0 absolute left-3 right-3 top-full z-20 mt-1.5 overflow-hidden rounded-lg border border-brand-border bg-white py-1 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.5)]"
+              className="stagger-0 absolute left-3 right-3 top-full z-20 mt-1.5 overflow-hidden rounded-lg border border-brand-border bg-white py-1 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.5)] dark:border-white/10 dark:bg-dark-surface"
             >
               <button
                 type="button"
@@ -139,7 +145,7 @@ export function Sidebar({
                   fileInputRef.current?.click();
                   setMenuOpen(false);
                 }}
-                className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50"
+                className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
               >
                 <UploadFileIcon className="h-[18px] w-[18px] text-brand-gray" />
                 Carregamento de arquivos
@@ -150,10 +156,33 @@ export function Sidebar({
                   folderInputRef.current?.click();
                   setMenuOpen(false);
                 }}
-                className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50"
+                className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
               >
                 <UploadFolderIcon className="h-[18px] w-[18px] text-brand-gray" />
                 Carregamento de pasta
+              </button>
+              <div className="my-1 border-t border-brand-border dark:border-white/10" />
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCreateFolder(true);
+                  setMenuOpen(false);
+                }}
+                className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
+              >
+                <FolderIcon className="h-[18px] w-[18px] text-brand-gray" />
+                Criar pasta
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCreateSharedFolder(true);
+                  setMenuOpen(false);
+                }}
+                className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
+              >
+                <UsersIcon className="h-[18px] w-[18px] text-brand-gray" />
+                Criar pasta compartilhada
               </button>
             </div>
           )}
@@ -193,18 +222,11 @@ export function Sidebar({
             <div className="mt-0.5">
               <NavRow
                 icon={<FolderIcon className="h-[18px] w-[18px]" />}
-                active={isMyDrive && currentFolderId === null}
+                active={isMyDrive}
                 onClick={() => onNavigateFolder([])}
               >
                 Meus arquivos
               </NavRow>
-              <div className="mt-0.5 pl-[26px]">
-                <FolderTree
-                  ownerId={userId}
-                  currentFolderId={isMyDrive ? currentFolderId : null}
-                  onNavigate={onNavigateFolder}
-                />
-              </div>
             </div>
           </>
         )}
@@ -232,6 +254,39 @@ export function Sidebar({
       </nav>
 
       {!isGuest && <StorageUsageIndicator userId={userId} />}
+
+      {showCreateFolder && (
+        <CreateFolderDialog
+          title="Nova pasta"
+          parentId={uploadTargetFolderId}
+          ownerId={userId}
+          invalidateKeys={createFolderInvalidateKeys}
+          onCreated={() => setShowCreateFolder(false)}
+          onClose={() => setShowCreateFolder(false)}
+        />
+      )}
+
+      {showCreateSharedFolder && (
+        <CreateFolderDialog
+          title="Nova pasta compartilhada"
+          parentId={uploadTargetFolderId}
+          ownerId={userId}
+          invalidateKeys={createFolderInvalidateKeys}
+          onCreated={(folder) => {
+            setShowCreateSharedFolder(false);
+            setShareTarget(folder);
+          }}
+          onClose={() => setShowCreateSharedFolder(false)}
+        />
+      )}
+
+      {shareTarget && (
+        <ShareDialog
+          target={{ kind: "folder", folder: shareTarget }}
+          currentUserId={userId}
+          onClose={() => setShareTarget(null)}
+        />
+      )}
     </aside>
   );
 }

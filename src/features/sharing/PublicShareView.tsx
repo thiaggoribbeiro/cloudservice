@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fileIconFor, formatBytes, isPreviewable } from "../../lib/format";
+import { formatBytes, isPreviewable } from "../../lib/format";
+import { FileTypeIcon } from "../../components/ui/FileTypeIcon";
 import { SIGNED_URL_TTL_SECONDS } from "../../lib/constants";
+import { useTheme } from "../../lib/useTheme";
+import { SunIcon, MoonIcon } from "../../components/ui/icons";
 import {
   resolveShareLink,
   listPublicFolderFiles,
@@ -40,6 +43,7 @@ function FilePreview({
 }
 
 export function PublicShareView({ token }: { token: string }) {
+  const { theme, toggleTheme } = useTheme();
   const { data: link, isLoading, error } = useQuery({
     queryKey: ["publicShareLink", token],
     queryFn: () => resolveShareLink(token),
@@ -53,12 +57,22 @@ export function PublicShareView({ token }: { token: string }) {
   });
 
   return (
-    <div className="bg-grain relative flex min-h-screen items-center justify-center overflow-hidden bg-white p-6">
-      <div className="wash-pale pointer-events-none absolute -right-40 -top-40 h-[32rem] w-[32rem] rounded-full opacity-70 blur-3xl" />
-      <div className="wash-secondary pointer-events-none absolute -bottom-48 -left-32 h-[28rem] w-[28rem] rounded-full opacity-60 blur-3xl" />
+    <div className="bg-grain relative flex min-h-screen items-center justify-center overflow-hidden bg-white p-6 dark:bg-black">
+      <div className="wash-pale pointer-events-none absolute -right-40 -top-40 h-[32rem] w-[32rem] rounded-full opacity-70 blur-3xl dark:opacity-30" />
+      <div className="wash-secondary pointer-events-none absolute -bottom-48 -left-32 h-[28rem] w-[28rem] rounded-full opacity-60 blur-3xl dark:opacity-25" />
+
+      <button
+        type="button"
+        onClick={toggleTheme}
+        aria-label={theme === "dark" ? "Usar tema claro" : "Usar tema escuro"}
+        title={theme === "dark" ? "Usar tema claro" : "Usar tema escuro"}
+        className="absolute right-6 top-6 flex h-9 w-9 items-center justify-center rounded-full border border-brand-border text-brand-gray transition-colors hover:text-brand-black dark:border-white/15 dark:text-white/70 dark:hover:text-white"
+      >
+        {theme === "dark" ? <SunIcon className="h-[18px] w-[18px]" /> : <MoonIcon className="h-[18px] w-[18px]" />}
+      </button>
 
       <div className="relative w-full max-w-md">
-        <div className="stagger-1 relative rounded-2xl border border-brand-border bg-white p-10 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.25)]">
+        <div className="stagger-1 relative rounded-2xl border border-brand-border bg-white p-10 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.25)] dark:border-white/10 dark:bg-dark-surface">
           <div className="stagger-0 flex justify-center pb-8">
             <img src="/logo-orange.png" alt="AvestaCloud" className="h-20 w-auto" />
           </div>
@@ -69,7 +83,7 @@ export function PublicShareView({ token }: { token: string }) {
 
           {!isLoading && (error || !link) && (
             <>
-              <h1 className="mt-1 text-2xl leading-none text-brand-black">Link invalido</h1>
+              <h1 className="mt-1 text-2xl leading-none text-brand-black dark:text-white">Link invalido</h1>
               <p className="mt-2 text-sm text-brand-gray">
                 Este link expirou ou foi revogado pelo dono do arquivo.
               </p>
@@ -78,9 +92,9 @@ export function PublicShareView({ token }: { token: string }) {
 
           {!isLoading && link?.kind === "file" && link.storage_path && (
             <div className="mt-4 flex flex-col items-center gap-4 text-center">
-              <span className="tile-icon">{fileIconFor(link.mime_type)}</span>
+              <FileTypeIcon name={link.name} mimeType={link.mime_type} className="h-14 w-14 rounded-xl" />
               <div>
-                <p className="text-xl font-bold leading-none text-brand-black">{link.name}</p>
+                <p className="text-xl font-bold leading-none text-brand-black dark:text-white">{link.name}</p>
                 {link.size_bytes !== null && (
                   <p className="mono-tag mt-1.5 text-xs text-brand-gray">{formatBytes(link.size_bytes)}</p>
                 )}
@@ -98,7 +112,7 @@ export function PublicShareView({ token }: { token: string }) {
 
           {!isLoading && link?.kind === "folder" && (
             <div className="mt-4 flex flex-col gap-3">
-              <p className="flex items-center gap-2 text-xl font-bold leading-none text-brand-black">
+              <p className="flex items-center gap-2 text-xl font-bold leading-none text-brand-black dark:text-white">
                 <span className="tile-icon h-9 w-9 text-lg text-brand-primary">📁</span>
                 {link.name}
               </p>
@@ -108,10 +122,10 @@ export function PublicShareView({ token }: { token: string }) {
               {folderFiles.map((file) => (
                 <div
                   key={file.id}
-                  className="flex items-center justify-between gap-2 rounded-lg border border-brand-border px-3.5 py-2.5 text-sm"
+                  className="flex items-center justify-between gap-2 rounded-lg border border-brand-border px-3.5 py-2.5 text-sm dark:border-white/10"
                 >
                   <span className="flex min-w-0 items-center gap-2">
-                    <span>{fileIconFor(file.mime_type)}</span>
+                    <FileTypeIcon name={file.name} mimeType={file.mime_type} className="h-6 w-6 shrink-0" />
                     <span className="truncate">{file.name}</span>
                     <span className="mono-tag shrink-0 text-[11px] text-brand-gray">
                       {formatBytes(file.size_bytes)}

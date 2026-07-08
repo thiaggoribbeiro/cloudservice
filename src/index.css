@@ -1,12 +1,25 @@
 @import "tailwindcss";
 
+/* Manual light/dark toggle (not just prefers-color-scheme) - a `dark` class
+   on <html>, set by useTheme and bootstrapped pre-paint in index.html. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
-  --color-brand-primary: #c4541b;
+  --color-brand-primary: #ff751f;
   --color-brand-secondary: #deaa8b;
   --color-brand-pale: #f0d3c4;
   --color-brand-gray: #b5b5b5;
   --color-brand-border: #e0e0e0;
   --color-brand-black: #000000;
+
+  /* Light theme's canvas - sidebar and page background both sit on this, so
+     the file-list containers (still plain white) read as elevated above it. */
+  --color-light-canvas: #f5f5f5;
+
+  /* Dark theme's two-tone system: canvas is the page background, surface is
+     everything that sits a notch "above" it (chrome, cards, popovers, modals). */
+  --color-dark-canvas: #141414;
+  --color-dark-surface: #1b1a19;
 
   /* A single typeface for the whole app; hierarchy comes from weight and size, not from mixing families. */
   --font-body: "Archivo", "Helvetica Neue", sans-serif;
@@ -18,17 +31,35 @@
   * {
     border-color: var(--color-brand-border);
   }
+  .dark * {
+    border-color: rgb(255 255 255 / 0.1);
+  }
+  /* Screens marked .force-light (the login form) must stay light regardless
+     of the app-wide dark class on <html> - this comes after ".dark *" above
+     so it wins the tie and resets borders back for anything inside. */
+  .force-light,
+  .force-light * {
+    border-color: var(--color-brand-border);
+  }
 
   html {
     font-family: var(--font-body);
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
   }
 
   body {
     margin: 0;
     color: var(--color-brand-black);
-    background-color: #ffffff;
+    background-color: var(--color-light-canvas);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+  .dark body {
+    color: #ffffff;
+    background-color: var(--color-dark-canvas);
   }
 
   h1,
@@ -80,13 +111,13 @@
     @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold transition-all duration-150;
   }
 
-  /* Primary call to action */
+  /* Primary call to action - identical in both themes, it already pops on either */
   .btn-primary {
     @apply bg-brand-primary text-white shadow-sm;
   }
   .btn-primary:hover:not(:disabled) {
     @apply -translate-y-px shadow-md;
-    background-color: #ad4a17;
+    background-color: #d9631a;
   }
   .btn-primary:active:not(:disabled) {
     @apply translate-y-0 shadow-none;
@@ -99,15 +130,65 @@
   .btn-ghost {
     @apply border border-brand-border text-brand-black hover:border-brand-secondary hover:bg-brand-pale/40;
   }
+  .dark .btn-ghost {
+    @apply border-white/15 text-white hover:border-brand-secondary hover:bg-white/10;
+  }
 
   /* Boxed input used across dialogs/forms */
   .field-input {
     @apply w-full rounded-md border border-brand-border bg-white px-3 py-2 text-sm text-brand-black outline-none transition-colors duration-150 placeholder:text-brand-gray focus:border-brand-primary;
   }
+  .dark .field-input {
+    @apply border-white/15 bg-white/5 text-white placeholder:text-white/35;
+  }
 
-  /* Underline-style input reserved for the login screen's signature form */
-  .field-underline {
-    @apply w-full border-0 border-b-2 border-brand-border bg-transparent px-0.5 py-2 text-base text-brand-black outline-none transition-colors duration-200 focus:border-brand-primary;
+  /* Native <select> popups don't reliably pick up color-scheme on every
+     platform (Windows Chromium in particular ignores it) - styling <option>
+     directly is the fix that actually reaches the dropdown's own rendering. */
+  .dark select.field-input option {
+    background-color: #1b1a19;
+    color: #ffffff;
+  }
+
+  /* Chrome/Edge paint autofilled fields with their own background once you
+     leave them, which can end up close enough to the text color to read as
+     blank - force the field's own colors back with the inset-shadow trick. */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-text-fill-color: #000000;
+    -webkit-box-shadow: 0 0 0px 1000px #ffffff inset;
+    box-shadow: 0 0 0px 1000px #ffffff inset;
+    transition: background-color 9999s ease-in-out 0s;
+  }
+  .dark input:-webkit-autofill,
+  .dark input:-webkit-autofill:hover,
+  .dark input:-webkit-autofill:focus,
+  .dark input:-webkit-autofill:active {
+    -webkit-text-fill-color: #ffffff;
+    -webkit-box-shadow: 0 0 0px 1000px var(--color-dark-surface) inset;
+    box-shadow: 0 0 0px 1000px var(--color-dark-surface) inset;
+  }
+  /* Re-assert the light autofill colors inside .force-light, since the rule
+     above keys off ".dark" as a plain ancestor class and would otherwise
+     leak through onto the always-light login form. */
+  .force-light input:-webkit-autofill,
+  .force-light input:-webkit-autofill:hover,
+  .force-light input:-webkit-autofill:focus,
+  .force-light input:-webkit-autofill:active {
+    -webkit-text-fill-color: #000000;
+    -webkit-box-shadow: 0 0 0px 1000px #ffffff inset;
+    box-shadow: 0 0 0px 1000px #ffffff inset;
+  }
+
+  /* Icon-prefixed pill input - makes the type-here target unmistakable
+     (used on the login screen, which is always light, so no dark variant). */
+  .field-pill {
+    @apply w-full rounded-xl border border-transparent bg-black/[0.04] py-3 pl-11 pr-4 text-base text-brand-black outline-none transition-colors duration-200 placeholder:text-brand-gray/70 focus:border-brand-primary focus:bg-white;
+  }
+  .field-pill-icon {
+    @apply pointer-events-none absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-brand-gray;
   }
 
   /* File / folder tile in the main grid (combine with "group" in markup for the hover-revealed menu button) */
@@ -117,9 +198,42 @@
   .tile:hover {
     @apply -translate-y-0.5 border-brand-secondary shadow-[0_8px_20px_-12px_rgba(0,0,0,0.25)];
   }
+  .dark .tile {
+    @apply border-white/10 bg-dark-surface;
+  }
 
   .tile-icon {
     @apply flex h-14 w-14 items-center justify-center rounded-lg bg-brand-pale/60 text-3xl;
+  }
+  .dark .tile-icon {
+    @apply bg-white/10;
+  }
+
+  /* Single bordered container holding every row in a file/folder list - rows
+     inside it are separated by a hairline divider, not their own boxes. */
+  .file-list {
+    @apply divide-y divide-brand-border overflow-hidden rounded-lg border border-brand-border bg-white;
+  }
+  .dark .file-list {
+    @apply divide-white/10 border-white/10 bg-dark-surface;
+  }
+
+  /* A row inside .file-list (combine with "group" in markup for the hover-revealed menu button) */
+  .file-row {
+    @apply relative flex w-full cursor-pointer items-center gap-3 px-4 py-2.5 transition-colors duration-150;
+  }
+  .file-row:hover {
+    @apply bg-brand-pale/20;
+  }
+  .dark .file-row:hover {
+    @apply bg-white/[0.06];
+  }
+
+  .file-row-icon {
+    @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-pale/60 text-lg;
+  }
+  .dark .file-row-icon {
+    @apply bg-white/10;
   }
 
   /* Die-cut manifest tab: the recurring signature shape (a hanging folder tab) */

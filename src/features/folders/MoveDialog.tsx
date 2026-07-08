@@ -80,12 +80,14 @@ export function MoveDialog({
 
   return (
     <Modal title={title} onClose={onClose}>
-      <div className="flex max-h-64 flex-col gap-0.5 overflow-y-auto rounded-lg border border-brand-border p-2">
+      <div className="flex max-h-64 flex-col gap-0.5 overflow-y-auto rounded-lg border border-brand-border p-2 dark:border-white/10">
         <button
           type="button"
           onClick={() => setSelected(null)}
           className={`rounded-md px-2.5 py-1.5 text-left text-sm transition-colors ${
-            selected === null ? "bg-brand-pale font-semibold" : "hover:bg-brand-pale/50"
+            selected === null
+              ? "bg-brand-pale font-semibold dark:bg-white/10"
+              : "hover:bg-brand-pale/50 dark:hover:bg-white/5"
           }`}
         >
           Meu Drive (raiz)
@@ -97,7 +99,9 @@ export function MoveDialog({
             onClick={() => setSelected(folder.id)}
             style={{ paddingLeft: `${depth * 16 + 10}px` }}
             className={`rounded-md px-2.5 py-1.5 text-left text-sm transition-colors ${
-              selected === folder.id ? "bg-brand-pale font-semibold" : "hover:bg-brand-pale/50"
+              selected === folder.id
+                ? "bg-brand-pale font-semibold dark:bg-white/10"
+                : "hover:bg-brand-pale/50 dark:hover:bg-white/5"
             }`}
           >
             {folder.name}

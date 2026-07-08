@@ -7,7 +7,8 @@ import { PreviewModal } from "../files/PreviewModal";
 import { downloadFile } from "../files/fileApi";
 import { StarIcon } from "../../components/ui/icons";
 import { listFavorites, removeFavoriteFile, removeFavoriteFolder } from "./favoritesApi";
-import { fileIconFor, formatBytes, isPreviewable } from "../../lib/format";
+import { formatBytes, formatRelativeTime, isPreviewable } from "../../lib/format";
+import { FileTypeIcon } from "../../components/ui/FileTypeIcon";
 import type { Folder, FileRow } from "../../types/domain";
 
 export function FavoritesView({ userId }: { userId: string }) {
@@ -61,60 +62,81 @@ export function FavoritesView({ userId }: { userId: string }) {
             description="Marque arquivos ou pastas como favoritos para encontra-los rapido aqui."
           />
         ) : (
-          <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {entries.map((entry) =>
-              entry.kind === "folder" ? (
-                <div
-                  key={entry.favoriteId}
-                  className="tile group"
-                  onDoubleClick={() => setSelectedRoot(entry.folder)}
-                >
-                  <span className="tile-icon text-brand-primary">📁</span>
-                  <span className="w-full truncate text-center text-sm font-medium text-brand-black">
-                    {entry.folder.name}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeFolderMutation.mutate(entry.folder.id);
-                    }}
-                    className="absolute right-1.5 top-1.5 rounded-md p-1 text-brand-primary opacity-0 transition-opacity hover:bg-brand-pale/60 group-hover:opacity-100"
-                    aria-label="Remover dos favoritos"
+          <>
+            <div className="flex items-center gap-3 px-4 pb-2">
+              <span className="eyebrow flex-1 text-brand-gray">Nome</span>
+              <span className="eyebrow hidden w-28 shrink-0 text-right text-brand-gray sm:block">
+                Modificado
+              </span>
+              <span className="eyebrow hidden w-20 shrink-0 text-right text-brand-gray sm:block">
+                Tamanho
+              </span>
+              <span className="w-7 shrink-0" />
+            </div>
+            <div className="file-list">
+              {entries.map((entry) =>
+                entry.kind === "folder" ? (
+                  <div
+                    key={entry.favoriteId}
+                    className="file-row group"
+                    onDoubleClick={() => setSelectedRoot(entry.folder)}
                   >
-                    <StarIcon className="h-4 w-4" fill="currentColor" />
-                  </button>
-                </div>
-              ) : (
-                <div
-                  key={entry.favoriteId}
-                  className="tile group"
-                  onDoubleClick={() =>
-                    isPreviewable(entry.file.mime_type) ? setPreview(entry.file) : downloadFile(entry.file)
-                  }
-                >
-                  <span className="tile-icon">{fileIconFor(entry.file.mime_type)}</span>
-                  <span className="w-full truncate text-center text-sm font-medium text-brand-black">
-                    {entry.file.name}
-                  </span>
-                  <span className="mono-tag text-[11px] text-brand-gray">
-                    {formatBytes(entry.file.size_bytes)}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeFileMutation.mutate(entry.file.id);
-                    }}
-                    className="absolute right-1.5 top-1.5 rounded-md p-1 text-brand-primary opacity-0 transition-opacity hover:bg-brand-pale/60 group-hover:opacity-100"
-                    aria-label="Remover dos favoritos"
+                    <span className="file-row-icon text-brand-primary">📁</span>
+                    <span className="min-w-0 flex-1 truncate text-sm font-medium text-brand-black dark:text-white">
+                      {entry.folder.name}
+                    </span>
+                    <span className="mono-tag hidden w-28 shrink-0 text-right text-[12px] text-brand-gray sm:block">
+                      {formatRelativeTime(entry.folder.updated_at)}
+                    </span>
+                    <span className="mono-tag hidden w-20 shrink-0 text-right text-[12px] text-brand-gray sm:block">
+                      —
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeFolderMutation.mutate(entry.folder.id);
+                      }}
+                      className="shrink-0 rounded-md p-1 text-brand-primary opacity-0 transition-opacity hover:bg-brand-pale/60 group-hover:opacity-100 dark:hover:bg-white/10"
+                      aria-label="Remover dos favoritos"
+                    >
+                      <StarIcon className="h-4 w-4" fill="currentColor" />
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    key={entry.favoriteId}
+                    className="file-row group"
+                    onDoubleClick={() =>
+                      isPreviewable(entry.file.mime_type) ? setPreview(entry.file) : downloadFile(entry.file)
+                    }
                   >
-                    <StarIcon className="h-4 w-4" fill="currentColor" />
-                  </button>
-                </div>
-              ),
-            )}
-          </div>
+                    <FileTypeIcon name={entry.file.name} mimeType={entry.file.mime_type} className="h-9 w-9 shrink-0 rounded-lg" />
+                    <span className="min-w-0 flex-1 truncate text-sm font-medium text-brand-black dark:text-white">
+                      {entry.file.name}
+                    </span>
+                    <span className="mono-tag hidden w-28 shrink-0 text-right text-[12px] text-brand-gray sm:block">
+                      {formatRelativeTime(entry.file.updated_at)}
+                    </span>
+                    <span className="mono-tag hidden w-20 shrink-0 text-right text-[12px] text-brand-gray sm:block">
+                      {formatBytes(entry.file.size_bytes)}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeFileMutation.mutate(entry.file.id);
+                      }}
+                      className="shrink-0 rounded-md p-1 text-brand-primary opacity-0 transition-opacity hover:bg-brand-pale/60 group-hover:opacity-100 dark:hover:bg-white/10"
+                      aria-label="Remover dos favoritos"
+                    >
+                      <StarIcon className="h-4 w-4" fill="currentColor" />
+                    </button>
+                  </div>
+                ),
+              )}
+            </div>
+          </>
         )}
       </div>
 

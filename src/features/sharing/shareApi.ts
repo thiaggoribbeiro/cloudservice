@@ -27,26 +27,32 @@ export async function listFolderShares(folderId: string): Promise<FolderShareWit
   }));
 }
 
-export async function shareFolderWithUser(
+export type ShareableUser = { id: string; email: string; display_name: string | null };
+
+// Every registered member, so the share dialog can offer a pick-list instead
+// of asking the sharer to type an email correctly (profiles are readable by
+// any authenticated user - see the "ver todos os perfis basicos" RLS policy).
+export async function listShareableUsers(): Promise<ShareableUser[]> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, email, display_name")
+    .order("display_name");
+  if (error) throw error;
+  return data;
+}
+
+export async function shareFolderWithUsers(
   folderId: string,
-  email: string,
+  userIds: string[],
   grantedBy: string,
 ): Promise<void> {
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("email", email.trim().toLowerCase())
-    .maybeSingle();
-  if (profileError) throw profileError;
-  if (!profile) {
-    throw new Error("Nenhum usuario encontrado com esse e-mail.");
-  }
-
-  const { error } = await supabase.from("folder_shares").insert({
-    folder_id: folderId,
-    shared_with_user_id: profile.id,
-    granted_by: grantedBy,
-  });
+  const { error } = await supabase.from("folder_shares").insert(
+    userIds.map((userId) => ({
+      folder_id: folderId,
+      shared_with_user_id: userId,
+      granted_by: grantedBy,
+    })),
+  );
   if (error) throw error;
 }
 

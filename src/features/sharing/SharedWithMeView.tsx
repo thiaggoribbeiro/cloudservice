@@ -4,6 +4,7 @@ import { Topbar } from "../../components/layout/Topbar";
 import { MainArea } from "../../components/layout/MainArea";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { listSharedWithMe } from "./shareApi";
+import { formatRelativeTime } from "../../lib/format";
 import type { Folder } from "../../types/domain";
 
 export function SharedWithMeView({ userId }: { userId: string }) {
@@ -46,16 +47,27 @@ export function SharedWithMeView({ userId }: { userId: string }) {
             description="Pastas que outros usuarios compartilharem com voce aparecem aqui."
           />
         ) : (
-          <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {entries.map(({ folder }) => (
-              <div key={folder.id} onDoubleClick={() => setSelectedRoot(folder)} className="tile">
-                <span className="tile-icon text-brand-primary">📁</span>
-                <span className="w-full truncate text-center text-sm font-medium text-brand-black">
-                  {folder.name}
-                </span>
-              </div>
-            ))}
-          </div>
+          <>
+            <div className="flex items-center gap-3 px-4 pb-2">
+              <span className="eyebrow flex-1 text-brand-gray">Nome</span>
+              <span className="eyebrow hidden w-28 shrink-0 text-right text-brand-gray sm:block">
+                Modificado
+              </span>
+            </div>
+            <div className="file-list">
+              {entries.map(({ folder }) => (
+                <div key={folder.id} onDoubleClick={() => setSelectedRoot(folder)} className="file-row">
+                  <span className="file-row-icon text-brand-primary">📁</span>
+                  <span className="min-w-0 flex-1 truncate text-sm font-medium text-brand-black dark:text-white">
+                    {folder.name}
+                  </span>
+                  <span className="mono-tag hidden w-28 shrink-0 text-right text-[12px] text-brand-gray sm:block">
+                    {formatRelativeTime(folder.updated_at)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>

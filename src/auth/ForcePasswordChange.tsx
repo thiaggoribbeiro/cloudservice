@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { useAuth } from "./useAuth";
+import { LockIcon } from "../components/ui/icons";
 
 export function ForcePasswordChange() {
   const { session, refreshProfile } = useAuth();
@@ -38,7 +39,7 @@ export function ForcePasswordChange() {
   }
 
   return (
-    <div className="bg-grain relative flex min-h-screen items-center justify-center overflow-hidden bg-white p-6">
+    <div className="force-light bg-grain relative flex min-h-screen items-center justify-center overflow-hidden bg-white p-6">
       <div
         aria-hidden
         className="wash-pale pointer-events-none absolute -right-40 -top-40 h-[32rem] w-[32rem] rounded-full opacity-70 blur-3xl"
@@ -51,10 +52,12 @@ export function ForcePasswordChange() {
       <div className="relative w-full max-w-md">
         <div className="stagger-1 relative rounded-2xl border border-brand-border bg-white p-10 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.25)]">
           <div className="stagger-0 flex justify-center pb-8">
-            <img src="/logo-orange.png" alt="AvestaCloud" className="h-24 w-auto" />
+            <img src="/logo-login.png" alt="AvestaCloud" className="h-36 w-auto" />
           </div>
 
-          <h1 className="text-center text-2xl leading-none text-brand-black/70">Defina sua senha</h1>
+          <h1 className="text-center text-2xl leading-none text-brand-black/70">
+            Defina sua senha
+          </h1>
           <p className="mt-2 text-center text-sm text-brand-gray">
             Esta e a sua primeira vez aqui. Escolha uma nova senha para continuar.
           </p>
@@ -64,32 +67,38 @@ export function ForcePasswordChange() {
               <label htmlFor="new-password" className="eyebrow text-brand-gray">
                 Nova senha
               </label>
-              <input
-                id="new-password"
-                type="password"
-                required
-                autoComplete="new-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="field-underline"
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <LockIcon className="field-pill-icon" />
+                <input
+                  id="new-password"
+                  type="password"
+                  required
+                  autoComplete="new-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="field-pill"
+                  placeholder="••••••••"
+                />
+              </div>
             </div>
 
             <div className="stagger-3 flex flex-col gap-1">
               <label htmlFor="confirm-password" className="eyebrow text-brand-gray">
                 Confirme a nova senha
               </label>
-              <input
-                id="confirm-password"
-                type="password"
-                required
-                autoComplete="new-password"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                className="field-underline"
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <LockIcon className="field-pill-icon" />
+                <input
+                  id="confirm-password"
+                  type="password"
+                  required
+                  autoComplete="new-password"
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  className="field-pill"
+                  placeholder="••••••••"
+                />
+              </div>
             </div>
 
             {error && (

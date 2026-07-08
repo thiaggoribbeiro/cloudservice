@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "./auth/useAuth";
 import { LoginForm } from "./auth/LoginForm";
 import { ForcePasswordChange } from "./auth/ForcePasswordChange";
@@ -19,8 +19,22 @@ function App() {
   const { session, profile, loading } = useAuth();
   const [view, setView] = useState<ViewSelection>({ kind: "home" });
   const [path, setPath] = useState<Folder[]>([]);
+  const lastUserId = useRef<string | null | undefined>(undefined);
 
   const isGuest = profile?.role === "guest";
+
+  // The app never fully reloads between accounts on the same tab (sign out
+  // then straight into a new member's first login), so without this the new
+  // account would inherit whatever view the previous one had left open -
+  // including admin-only screens like Membros. Always land fresh on Home.
+  useEffect(() => {
+    const userId = session?.user.id ?? null;
+    if (lastUserId.current !== undefined && lastUserId.current !== userId) {
+      setView({ kind: "home" });
+      setPath([]);
+    }
+    lastUserId.current = userId;
+  }, [session?.user.id]);
 
   // Convidados have no personal drive, so their landing view is whatever was
   // shared with them - swap out the "home" default the moment we know that.
@@ -34,7 +48,7 @@ function App() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white">
+      <div className="flex min-h-screen items-center justify-center bg-white dark:bg-black">
         <p className="eyebrow text-brand-gray">Carregando…</p>
       </div>
     );
@@ -57,7 +71,7 @@ function App() {
     <div className="flex h-screen flex-col overflow-hidden">
       <GlobalTopbar userEmail={session.user.email} profile={profile} onNavigateFolder={handleNavigateFolder} />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 gap-6 overflow-hidden">
         <Sidebar
           view={view}
           path={path}
@@ -88,7 +102,7 @@ function App() {
 
         {view.kind === "trash" && <TrashView />}
 
-        {view.kind === "members" && (
+        {view.kind === "members" && (profile?.role === "admin" || profile?.role === "manager") && (
           <MembersView
             currentUserId={session.user.id}
             currentUserEmail={session.user.email ?? ""}

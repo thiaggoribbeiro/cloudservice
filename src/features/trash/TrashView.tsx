@@ -3,7 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Topbar } from "../../components/layout/Topbar";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
-import { fileIconFor, formatBytes } from "../../lib/format";
+import { formatBytes } from "../../lib/format";
+import { FileTypeIcon } from "../../components/ui/FileTypeIcon";
 import {
   listTrashedFolders,
   listTrashedFiles,
@@ -28,7 +29,7 @@ function DeleteAction({ deletedAt, onConfirm }: { deletedAt: string | null; onCo
   }
 
   return (
-    <button type="button" onClick={onConfirm} className="text-sm text-brand-gray hover:text-brand-black hover:underline">
+    <button type="button" onClick={onConfirm} className="text-sm text-brand-gray hover:text-brand-black hover:underline dark:hover:text-white">
       Excluir definitivamente
     </button>
   );
@@ -86,7 +87,7 @@ export function TrashView() {
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <Topbar path={[]} onNavigate={() => {}} title="Lixeira" />
-      <div className="flex items-center justify-between border-b border-brand-border px-6 py-3">
+      <div className="flex items-center justify-between border-b border-brand-border px-6 py-3 dark:border-white/10">
         <p className="mono-tag text-xs text-brand-gray">
           Itens ficam aqui por 30 dias antes da exclusao definitiva
         </p>
@@ -101,14 +102,14 @@ export function TrashView() {
         {isEmpty ? (
           <EmptyState title="Lixeira vazia" description="Itens excluidos aparecem aqui por 30 dias." />
         ) : (
-          <div className="flex flex-col gap-2">
+          <div className="file-list">
             {folders.map((folder) => (
               <div
                 key={folder.id}
-                className="flex items-center justify-between rounded-lg border border-brand-border px-4 py-2.5"
+                className="file-row flex items-center justify-between"
               >
                 <span className="flex items-center gap-2.5 truncate text-sm font-medium">
-                  <span className="tile-icon h-8 w-8 text-base text-brand-primary">📁</span>
+                  <span className="file-row-icon text-brand-primary">📁</span>
                   {folder.name}
                 </span>
                 <div className="flex shrink-0 items-center gap-4">
@@ -130,10 +131,10 @@ export function TrashView() {
             {files.map((file) => (
               <div
                 key={file.id}
-                className="flex items-center justify-between rounded-lg border border-brand-border px-4 py-2.5"
+                className="file-row flex items-center justify-between"
               >
                 <span className="flex items-center gap-2.5 truncate text-sm font-medium">
-                  <span className="tile-icon h-8 w-8 text-base">{fileIconFor(file.mime_type)}</span>
+                  <FileTypeIcon name={file.name} mimeType={file.mime_type} className="h-9 w-9 shrink-0 rounded-lg" />
                   {file.name}
                   <span className="mono-tag shrink-0 text-[11px] font-normal text-brand-gray">
                     {formatBytes(file.size_bytes)}
