@@ -33,10 +33,11 @@ export async function createFolder(
   name: string,
   parentId: string | null,
   ownerId: string,
+  isLocked?: boolean,
 ): Promise<Folder> {
   const { data, error } = await supabase
     .from("folders")
-    .insert({ name, parent_id: parentId, owner_id: ownerId })
+    .insert({ name, parent_id: parentId, owner_id: ownerId, is_locked: isLocked ?? false })
     .select()
     .single();
   if (error) throw error;
@@ -50,5 +51,10 @@ export async function renameFolder(id: string, name: string): Promise<void> {
 
 export async function moveFolder(id: string, newParentId: string | null): Promise<void> {
   const { error } = await supabase.from("folders").update({ parent_id: newParentId }).eq("id", id);
+  if (error) throw error;
+}
+
+export async function toggleFolderLock(id: string, locked: boolean): Promise<void> {
+  const { error } = await supabase.from("folders").update({ is_locked: locked }).eq("id", id);
   if (error) throw error;
 }

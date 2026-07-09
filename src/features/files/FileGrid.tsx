@@ -4,7 +4,7 @@ import type { Folder, FileRow, UserRole } from "../../types/domain";
 import { formatBytes, isPreviewable, formatRelativeTime } from "../../lib/format";
 import { FileTypeIcon } from "../../components/ui/FileTypeIcon";
 import { downloadFile, renameFile, moveFile } from "./fileApi";
-import { renameFolder, moveFolder } from "../folders/folderApi";
+import { renameFolder, moveFolder, toggleFolderLock } from "../folders/folderApi";
 import { softDeleteFolder, softDeleteFile } from "../trash/trashApi";
 import {
   addFavoriteFile,
@@ -13,7 +13,7 @@ import {
   removeFavoriteFolder,
 } from "../favorites/favoritesApi";
 import { useFavoriteIds } from "../favorites/useFavoriteIds";
-import { StarIcon } from "../../components/ui/icons";
+import { StarIcon, LockIcon } from "../../components/ui/icons";
 import { RenameDialog } from "../folders/RenameDialog";
 import { MoveDialog } from "../folders/MoveDialog";
 import { ShareDialog } from "../sharing/ShareDialog";
@@ -36,6 +36,8 @@ function ItemMenu({
   onDownload,
   onToggleFavorite,
   isFavorited,
+  onToggleLock,
+  isLocked,
   onDelete,
   onOpen,
   onClose,
@@ -46,6 +48,8 @@ function ItemMenu({
   onDownload?: () => void;
   onToggleFavorite: () => void;
   isFavorited: boolean;
+  onToggleLock?: () => void;
+  isLocked?: boolean;
   onDelete?: () => void;
   onOpen: boolean;
   onClose: () => void;
@@ -109,6 +113,19 @@ function ItemMenu({
       >
         Mover
       </button>
+      {onToggleLock && (
+        <button
+          type="button"
+          onClick={() => {
+            onToggleLock();
+            onClose();
+          }}
+          className="flex w-full items-center gap-2 px-3.5 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
+        >
+          <LockIcon className="h-4 w-4 shrink-0" />
+          {isLocked ? "Destravar pasta" : "Travar pasta"}
+        </button>
+      )}
       {onDelete && (
         <>
           <div className="my-1 border-t border-brand-border dark:border-white/10" />
@@ -147,12 +164,16 @@ export function FileGrid({
   const [dialog, setDialog] = useState<ActiveDialog | null>(null);
   const queryClient = useQueryClient();
 
+  const isManager = userRole === "admin" || userRole === "manager";
+
   // Only admin/manager may delete items they don't own - a plain user or
   // guest can delete only what they created/uploaded themselves, even
-  // inside a folder shared with them for editing (enforced again
+  // inside a folder shared with them for editing. A locked folder can only
+  // be deleted by admin/manager regardless of ownership (enforced again
   // server-side by a trigger).
-  function canDelete(ownerId: string) {
-    return userRole === "admin" || userRole === "manager" || ownerId === currentUserId;
+  function canDelete(ownerId: string, locked?: boolean) {
+    if (locked && !isManager) return false;
+    return isManager || ownerId === currentUserId;
   }
 
   useEffect(() => {
@@ -182,6 +203,10 @@ export function FileGrid({
   });
   const deleteFileMutation = useMutation({
     mutationFn: softDeleteFile,
+    onSuccess: invalidateCurrent,
+  });
+  const toggleLockMutation = useMutation({
+    mutationFn: ({ id, locked }: { id: string; locked: boolean }) => toggleFolderLock(id, locked),
     onSuccess: invalidateCurrent,
   });
 
@@ -233,6 +258,9 @@ export function FileGrid({
               {favoriteIds?.folderIds.has(folder.id) && (
                 <StarIcon className="h-3.5 w-3.5 shrink-0 text-brand-primary" fill="currentColor" />
               )}
+              {folder.is_locked && (
+                <LockIcon className="h-3.5 w-3.5 shrink-0 text-brand-gray" />
+              )}
               <span className="truncate text-sm font-medium text-brand-black dark:text-white">{folder.name}</span>
             </span>
             <span className="mono-tag hidden w-28 shrink-0 text-right text-[12px] text-brand-gray sm:block">
@@ -261,7 +289,17 @@ export function FileGrid({
               onShare={() => setDialog({ kind: "share-folder", folder })}
               onToggleFavorite={() => favoriteFolderMutation.mutate(folder)}
               isFavorited={!!favoriteIds?.folderIds.has(folder.id)}
-              onDelete={canDelete(folder.owner_id) ? () => deleteFolderMutation.mutate(folder.id) : undefined}
+              onToggleLock={
+                folder.repository_id && isManager
+                  ? () => toggleLockMutation.mutate({ id: folder.id, locked: !folder.is_locked })
+                  : undefined
+              }
+              isLocked={folder.is_locked}
+              onDelete={
+                canDelete(folder.owner_id, folder.is_locked)
+                  ? () => deleteFolderMutation.mutate(folder.id)
+                  : undefined
+              }
             />
           </div>
         ))}

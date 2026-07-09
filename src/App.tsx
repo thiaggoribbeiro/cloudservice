@@ -11,6 +11,7 @@ import { FavoritesView } from "./features/favorites/FavoritesView";
 import { PublicShareView } from "./features/sharing/PublicShareView";
 import { TrashView } from "./features/trash/TrashView";
 import { MembersView } from "./features/members/MembersView";
+import { RepositoriesView } from "./features/repositories/RepositoriesView";
 import type { Folder, ViewSelection } from "./types/domain";
 
 const publicShareMatch = window.location.pathname.match(/^\/s\/(.+)$/);
@@ -83,6 +84,7 @@ function App() {
           onSelectFavorites={() => setView({ kind: "favorites" })}
           onSelectTrash={() => setView({ kind: "trash" })}
           onSelectMembers={() => setView({ kind: "members" })}
+          onSelectRepositories={() => setView({ kind: "repositories" })}
         />
 
         {view.kind === "home" && <HomeView ownerId={session.user.id} />}
@@ -113,6 +115,10 @@ function App() {
             currentUserEmail={session.user.email ?? ""}
             currentUserRole={profile?.role ?? "user"}
           />
+        )}
+
+        {view.kind === "repositories" && (profile?.role === "admin" || profile?.role === "manager") && (
+          <RepositoriesView userId={session.user.id} userRole={profile?.role ?? "user"} />
         )}
       </div>
     </div>

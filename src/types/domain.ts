@@ -6,6 +6,7 @@ export type FolderShare = Tables<"folder_shares">;
 export type ShareLink = Tables<"share_links">;
 export type Profile = Tables<"profiles">;
 export type Favorite = Tables<"favorites">;
+export type Repository = Tables<"repositories">;
 export type UserRole = Enums<"user_role">;
 
 export type ViewSelection =
@@ -14,4 +15,5 @@ export type ViewSelection =
   | { kind: "shared" }
   | { kind: "favorites" }
   | { kind: "trash" }
-  | { kind: "members" };
+  | { kind: "members" }
+  | { kind: "repositories" };

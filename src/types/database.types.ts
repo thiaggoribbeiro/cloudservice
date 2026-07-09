@@ -63,6 +63,7 @@ export type Database = {
           mime_type: string | null
           name: string
           owner_id: string
+          repository_id: string | null
           size_bytes: number
           storage_path: string
           updated_at: string
@@ -76,6 +77,7 @@ export type Database = {
           mime_type?: string | null
           name: string
           owner_id: string
+          repository_id?: string | null
           size_bytes?: number
           storage_path: string
           updated_at?: string
@@ -89,6 +91,7 @@ export type Database = {
           mime_type?: string | null
           name?: string
           owner_id?: string
+          repository_id?: string | null
           size_bytes?: number
           storage_path?: string
           updated_at?: string
@@ -99,6 +102,13 @@ export type Database = {
             columns: ["folder_id"]
             isOneToOne: false
             referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "files_repository_id_fkey"
+            columns: ["repository_id"]
+            isOneToOne: false
+            referencedRelation: "repositories"
             referencedColumns: ["id"]
           },
         ]
@@ -143,27 +153,33 @@ export type Database = {
           created_at: string
           deleted_at: string | null
           id: string
+          is_locked: boolean
           name: string
           owner_id: string
           parent_id: string | null
+          repository_id: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           deleted_at?: string | null
           id?: string
+          is_locked?: boolean
           name: string
           owner_id: string
           parent_id?: string | null
+          repository_id?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           deleted_at?: string | null
           id?: string
+          is_locked?: boolean
           name?: string
           owner_id?: string
           parent_id?: string | null
+          repository_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -172,6 +188,13 @@ export type Database = {
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folders_repository_id_fkey"
+            columns: ["repository_id"]
+            isOneToOne: false
+            referencedRelation: "repositories"
             referencedColumns: ["id"]
           },
         ]
@@ -205,6 +228,41 @@ export type Database = {
           storage_quota_bytes?: number
         }
         Relationships: []
+      }
+      repositories: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+          quota_bytes: number
+          root_folder_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          name: string
+          quota_bytes?: number
+          root_folder_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+          quota_bytes?: number
+          root_folder_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "repositories_root_folder_id_fkey"
+            columns: ["root_folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       share_links: {
         Row: {
@@ -264,6 +322,20 @@ export type Database = {
           owner_email: string
           owner_id: string
           parent_id: string
+        }[]
+      }
+      create_repository: {
+        Args: { p_name: string; p_quota_bytes: number }
+        Returns: {
+          repository_id: string
+          root_folder_id: string
+        }[]
+      }
+      get_repository_usage: {
+        Args: { p_repository_id: string }
+        Returns: {
+          quota_bytes: number
+          used_bytes: number
         }[]
       }
       get_storage_usage: {

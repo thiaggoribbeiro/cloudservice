@@ -14,6 +14,7 @@ import {
   StarIcon,
   TrashIcon,
   UsersIcon,
+  RepositoryIcon,
 } from "../ui/icons";
 import type { Folder, UserRole, ViewSelection } from "../../types/domain";
 
@@ -58,6 +59,7 @@ export function Sidebar({
   onSelectFavorites,
   onSelectTrash,
   onSelectMembers,
+  onSelectRepositories,
 }: {
   view: ViewSelection;
   path: Folder[];
@@ -69,6 +71,7 @@ export function Sidebar({
   onSelectFavorites: () => void;
   onSelectTrash: () => void;
   onSelectMembers: () => void;
+  onSelectRepositories: () => void;
 }) {
   const currentFolderId = path.length ? path[path.length - 1].id : null;
   const isMyDrive = view.kind === "folder";
@@ -228,6 +231,18 @@ export function Sidebar({
                 Meus arquivos
               </NavRow>
             </div>
+
+            {canManageMembers && (
+              <div className="mt-0.5">
+                <NavRow
+                  icon={<RepositoryIcon className="h-[18px] w-[18px]" />}
+                  active={view.kind === "repositories"}
+                  onClick={onSelectRepositories}
+                >
+                  Repositorios
+                </NavRow>
+              </div>
+            )}
           </>
         )}
 

@@ -147,3 +147,16 @@ export function LockIcon(props: IconProps) {
     </svg>
   );
 }
+
+// A stored-away archive crate - deliberately distinct from FolderIcon, since
+// a repositorio is a different kind of space (shared, quota-managed) rather
+// than just another folder.
+export function RepositoryIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 8.2A1.2 1.2 0 0 1 5.2 7h13.6A1.2 1.2 0 0 1 20 8.2v2.3H4z" />
+      <path d="M4.6 10.5h14.8v7.3a1.2 1.2 0 0 1-1.2 1.2H5.8a1.2 1.2 0 0 1-1.2-1.2z" />
+      <path d="M10 13.6h4" />
+    </svg>
+  );
+}
