@@ -109,11 +109,11 @@ export function MoveDialog({
         ))}
       </div>
 
-      <div className="mt-4 flex justify-end gap-2">
-        <button type="button" onClick={onClose} className="btn-ghost border-transparent">
+      <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <button type="button" onClick={onClose} className="btn-ghost w-full border-transparent sm:w-auto">
           Cancelar
         </button>
-        <button type="button" disabled={mutation.isPending} onClick={() => mutation.mutate()} className="btn-primary">
+        <button type="button" disabled={mutation.isPending} onClick={() => mutation.mutate()} className="btn-primary w-full sm:w-auto">
           Mover para ca
         </button>
       </div>

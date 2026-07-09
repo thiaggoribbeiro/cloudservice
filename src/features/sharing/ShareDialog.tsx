@@ -217,7 +217,7 @@ function LinkTab({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-end gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
         <div className="flex flex-1 flex-col gap-1">
           <label className="eyebrow text-brand-gray">Expira em (opcional)</label>
           <input
@@ -231,7 +231,7 @@ function LinkTab({
           type="button"
           onClick={() => createMutation.mutate()}
           disabled={createMutation.isPending}
-          className="btn-primary shrink-0 px-3.5 py-2"
+          className="btn-primary w-full shrink-0 px-3.5 py-2 sm:w-auto"
         >
           Criar link
         </button>
@@ -245,10 +245,10 @@ function LinkTab({
         {links.map((link) => (
           <div
             key={link.id}
-            className="flex items-center justify-between gap-2 rounded-lg border border-brand-border px-3.5 py-2.5 text-sm dark:border-white/10"
+            className="flex flex-col gap-2 rounded-lg border border-brand-border px-3.5 py-2.5 text-sm dark:border-white/10 sm:flex-row sm:items-center sm:justify-between"
           >
             <span className="mono-tag truncate text-[0.8rem] text-brand-black dark:text-white">{shareLinkUrl(link.token)}</span>
-            <div className="flex shrink-0 gap-3">
+            <div className="flex w-full shrink-0 justify-end gap-3 sm:w-auto">
               <button
                 type="button"
                 onClick={() => copyToClipboard(link.token, link.id)}

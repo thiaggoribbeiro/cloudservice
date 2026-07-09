@@ -64,19 +64,19 @@ export function MembersView({
   }
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
+    <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
       <Topbar path={[]} onNavigate={() => {}} title="Membros" />
 
-      <div className="flex items-center justify-between border-b border-brand-border px-6 py-3 dark:border-white/10">
+      <div className="flex flex-col gap-3 border-b border-brand-border px-4 py-3 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <p className="mono-tag text-xs text-brand-gray">
           {members.length} {members.length === 1 ? "membro cadastrado" : "membros cadastrados"}
         </p>
-        <button type="button" onClick={() => setShowCreate(true)} className="btn-primary text-sm">
+        <button type="button" onClick={() => setShowCreate(true)} className="btn-primary w-full text-sm sm:w-auto">
           + Novo membro
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6">
         {isLoading ? (
           <p className="eyebrow text-brand-gray">Carregando…</p>
         ) : members.length === 0 ? (
@@ -88,7 +88,7 @@ export function MembersView({
               return (
                 <div
                   key={member.id}
-                  className="flex items-center justify-between rounded-lg border border-brand-border px-4 py-3 dark:border-white/10 dark:bg-white/[0.04]"
+                  className="flex flex-col gap-3 rounded-lg border border-brand-border px-4 py-3 dark:border-white/10 dark:bg-white/[0.04] sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="flex min-w-0 flex-col">
                     <span className="truncate text-sm font-medium text-brand-black dark:text-white">
@@ -96,7 +96,7 @@ export function MembersView({
                     </span>
                     <span className="mono-tag truncate text-[11px] text-brand-gray">{member.email}</span>
                   </div>
-                  <div className="flex shrink-0 items-center gap-3">
+                  <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end sm:gap-3">
                     <span className="eyebrow rounded-full border border-brand-border px-2.5 py-1 text-brand-primary dark:border-white/15">
                       {ROLE_LABEL[member.role]}
                     </span>
@@ -221,7 +221,7 @@ function CreateMemberDialog({
 
   return (
     <Modal title="Novo membro" onClose={onClose}>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1">
           <label className="eyebrow text-brand-gray">Nome de exibicao</label>
           <input
@@ -260,7 +260,7 @@ function CreateMemberDialog({
         </div>
 
         {role === "guest" && (
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 sm:col-span-2">
             <label className="eyebrow text-brand-gray">Pasta compartilhada</label>
             <select value={folderId} onChange={(e) => setFolderId(e.target.value)} className="field-input">
               <option value="">Selecione uma pasta…</option>
@@ -281,9 +281,9 @@ function CreateMemberDialog({
           </div>
         )}
 
-        {error && <p className="text-sm text-brand-primary">{error}</p>}
+        {error && <p className="text-sm text-brand-primary sm:col-span-2">{error}</p>}
 
-        <button type="submit" disabled={createMutation.isPending} className="btn-primary w-full py-2.5">
+        <button type="submit" disabled={createMutation.isPending} className="btn-primary w-full py-2.5 sm:col-span-2">
           {createMutation.isPending ? "Criando…" : "Criar membro"}
         </button>
       </form>
@@ -330,7 +330,7 @@ function EditMemberDialog({
 
   return (
     <Modal title={`Editar "${member.display_name || member.email}"`} onClose={onClose}>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1">
           <label htmlFor="edit-display-name" className="eyebrow text-brand-gray">
             Nome de exibicao
@@ -362,13 +362,13 @@ function EditMemberDialog({
           </select>
         </div>
 
-        {error && <p className="text-sm text-brand-primary">{error}</p>}
+        {error && <p className="text-sm text-brand-primary sm:col-span-2">{error}</p>}
 
-        <button type="submit" disabled={updateMutation.isPending} className="btn-primary w-full py-2.5">
+        <button type="submit" disabled={updateMutation.isPending} className="btn-primary w-full py-2.5 sm:col-span-2">
           {updateMutation.isPending ? "Salvando…" : "Salvar alteracoes"}
         </button>
 
-        <div className="border-t border-brand-border pt-4 dark:border-white/10">
+        <div className="border-t border-brand-border pt-4 dark:border-white/10 sm:col-span-2">
           <button
             type="button"
             onClick={() => {
@@ -412,8 +412,8 @@ function TemporaryPasswordDialog({
           Ao entrar com ela, sera solicitada a criacao de uma nova senha.
         </p>
 
-        <div className="flex items-center justify-between gap-2 rounded-lg border border-brand-border bg-brand-pale/30 px-4 py-3 dark:border-white/10 dark:bg-white/[0.06]">
-          <span className="mono-tag text-base text-brand-black dark:text-white">{result.temporary_password}</span>
+        <div className="flex flex-col gap-2 rounded-lg border border-brand-border bg-brand-pale/30 px-4 py-3 dark:border-white/10 dark:bg-white/[0.06] sm:flex-row sm:items-center sm:justify-between">
+          <span className="mono-tag break-all text-base text-brand-black dark:text-white">{result.temporary_password}</span>
           <button type="button" onClick={copy} className="btn-ghost shrink-0 px-3 py-1.5 text-sm">
             {copied ? "Copiado!" : "Copiar"}
           </button>

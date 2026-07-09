@@ -78,14 +78,14 @@ export function GlobalTopbar({
   const hasResults = !!results && (results.folders.length > 0 || results.files.length > 0);
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-6 bg-white px-6 dark:bg-dark-surface">
+    <header className="flex min-h-14 shrink-0 flex-wrap items-center gap-3 bg-white px-3 py-2 dark:bg-dark-surface sm:flex-nowrap sm:gap-4 sm:px-4 lg:gap-6 lg:px-6">
       <img
         src={theme === "dark" ? "/logo-dark.png" : "/logo-claro.png"}
         alt="AvestaCloud"
-        className="h-12 w-auto shrink-0"
+        className="h-10 w-auto shrink-0 sm:h-12"
       />
 
-      <div ref={searchRef} className="relative flex flex-1 justify-center">
+      <div ref={searchRef} className="relative order-3 flex w-full justify-center sm:order-none sm:w-auto sm:flex-1">
         <div className="w-full max-w-md">
           <div className="relative">
             <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-gray dark:text-white/60" />
@@ -165,13 +165,13 @@ export function GlobalTopbar({
         <button
           type="button"
           onClick={() => setProfileOpen((o) => !o)}
-          className="mono-tag rounded-md px-2 py-1.5 text-sm text-brand-black/80 transition-colors hover:bg-black/5 hover:text-brand-black dark:text-white/90 dark:hover:bg-white/10 dark:hover:text-white"
+          className="mono-tag block max-w-[10rem] truncate rounded-md px-2 py-1.5 text-sm text-brand-black/80 transition-colors hover:bg-black/5 hover:text-brand-black dark:text-white/90 dark:hover:bg-white/10 dark:hover:text-white sm:max-w-[14rem] lg:max-w-none"
         >
           {userEmail}
         </button>
 
         {profileOpen && (
-          <div className="absolute right-0 top-full z-30 mt-2 w-72 rounded-lg border border-brand-border bg-white p-5 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.35)] dark:border-white/10 dark:bg-dark-surface">
+          <div className="absolute right-0 top-full z-30 mt-2 w-[min(18rem,calc(100vw-1.5rem))] rounded-lg border border-brand-border bg-white p-5 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.35)] dark:border-white/10 dark:bg-dark-surface">
             <div className="flex items-center gap-3">
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-primary text-base font-bold text-white">
                 {getInitials(profile?.display_name, userEmail)}

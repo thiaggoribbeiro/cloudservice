@@ -34,7 +34,7 @@ function NavRow({
     <button
       type="button"
       onClick={onClick}
-      className={`relative flex w-full items-center gap-2.5 rounded-md py-2 pl-3 pr-2 text-left text-[0.9rem] transition-colors ${
+      className={`relative flex w-auto shrink-0 items-center gap-2.5 rounded-md py-2 pl-3 pr-2 text-left text-[0.9rem] transition-colors md:w-full ${
         active
           ? "bg-white font-semibold text-brand-primary shadow-sm dark:bg-white/12 dark:text-white dark:shadow-none"
           : "text-brand-black/70 hover:bg-black/5 hover:text-brand-black dark:text-white/75 dark:hover:bg-white/10 dark:hover:text-white"
@@ -134,14 +134,14 @@ export function Sidebar({
   const createFolderInvalidateKeys = [["folderChildren", uploadTargetFolderId]];
 
   return (
-    <aside className="flex w-64 shrink-0 flex-col bg-light-canvas pt-4 dark:bg-dark-canvas">
+    <aside className="flex w-full shrink-0 flex-col border-b border-brand-border bg-light-canvas pt-3 dark:border-white/10 dark:bg-dark-canvas md:h-full md:w-56 md:border-b-0 md:pt-4 lg:w-64">
       {canUseCreateMenu && (
-        <div className="relative px-3 pb-4">
+        <div className="relative px-3 pb-2 md:pb-4">
           <button
             type="button"
             data-item-menu-trigger
             onClick={() => setMenuOpen((o) => !o)}
-            className="flex w-4/5 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-linear-to-br from-brand-secondary to-[#7f3712] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:-translate-y-px hover:shadow-md"
+            className="flex w-full max-w-xs items-center justify-center gap-2 whitespace-nowrap rounded-full bg-linear-to-br from-brand-secondary to-[#7f3712] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:-translate-y-px hover:shadow-md md:w-4/5"
           >
             <PlusIcon className="h-4 w-4" />
             Criar ou carregar
@@ -150,7 +150,7 @@ export function Sidebar({
           {menuOpen && (
             <div
               data-item-menu
-              className="stagger-0 absolute left-3 right-3 top-full z-20 mt-1.5 overflow-hidden rounded-lg border border-brand-border bg-white py-1 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.5)] dark:border-white/10 dark:bg-dark-surface"
+              className="stagger-0 absolute left-3 top-full z-20 mt-1.5 w-[min(18rem,calc(100vw-1.5rem))] overflow-hidden rounded-lg border border-brand-border bg-white py-1 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.5)] dark:border-white/10 dark:bg-dark-surface md:right-3 md:w-auto"
             >
               <button
                 type="button"
@@ -227,14 +227,14 @@ export function Sidebar({
         </div>
       )}
 
-      <nav className="flex-1 overflow-y-auto px-3">
+      <nav className="flex gap-1 overflow-x-auto px-3 pb-2 md:flex-1 md:flex-col md:gap-0 md:overflow-x-visible md:overflow-y-auto md:pb-0">
         {!isGuest && (
           <>
             <NavRow icon={<HomeIcon className="h-[18px] w-[18px]" />} active={view.kind === "home"} onClick={onSelectHome}>
               Pagina inicial
             </NavRow>
 
-            <div className="mt-0.5">
+            <div className="shrink-0 md:mt-0.5">
               <NavRow
                 icon={<FolderIcon className="h-[18px] w-[18px]" />}
                 active={isMyDrive}
@@ -245,7 +245,7 @@ export function Sidebar({
             </div>
 
             {canManageMembers && (
-              <div className="mt-0.5">
+              <div className="shrink-0 md:mt-0.5">
                 <NavRow
                   icon={<RepositoryIcon className="h-[18px] w-[18px]" />}
                   active={view.kind === "repositories"}
@@ -258,7 +258,7 @@ export function Sidebar({
           </>
         )}
 
-        <div className="mt-3 flex flex-col gap-0.5">
+        <div className="mt-0 flex shrink-0 gap-1 md:mt-3 md:flex-col md:gap-0.5">
           <NavRow icon={<ShareIcon className="h-[18px] w-[18px]" />} active={view.kind === "shared"} onClick={onSelectShared}>
             Compartilhado comigo
           </NavRow>

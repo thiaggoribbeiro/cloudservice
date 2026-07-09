@@ -46,11 +46,11 @@ export function RenameDialog({
           className="field-input"
         />
         {error && <p className="text-sm text-brand-primary">{error}</p>}
-        <div className="flex justify-end gap-2">
-          <button type="button" onClick={onClose} className="btn-ghost border-transparent">
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <button type="button" onClick={onClose} className="btn-ghost w-full border-transparent sm:w-auto">
             Cancelar
           </button>
-          <button type="submit" disabled={mutation.isPending} className="btn-primary">
+          <button type="submit" disabled={mutation.isPending} className="btn-primary w-full sm:w-auto">
             Renomear
           </button>
         </div>

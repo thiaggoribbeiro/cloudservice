@@ -80,14 +80,14 @@ export function CreateRepositoryDialog({
 
         {error && <p className="text-sm text-brand-primary">{error}</p>}
 
-        <div className="flex justify-end gap-2">
-          <button type="button" onClick={onClose} className="btn-ghost border-transparent">
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <button type="button" onClick={onClose} className="btn-ghost w-full border-transparent sm:w-auto">
             Cancelar
           </button>
           <button
             type="submit"
             disabled={mutation.isPending || !name.trim() || !quotaValid}
-            className="btn-primary"
+            className="btn-primary w-full sm:w-auto"
           >
             {mutation.isPending ? "Criando…" : "Criar"}
           </button>

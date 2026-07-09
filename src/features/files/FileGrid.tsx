@@ -282,7 +282,7 @@ export function FileGrid({
                 setOpenMenuId(openMenuId === folder.id ? null : folder.id);
               }}
               data-item-menu-trigger
-              className="shrink-0 rounded-md px-1.5 py-0.5 text-brand-gray opacity-0 transition-opacity hover:bg-brand-pale/60 group-hover:opacity-100 dark:hover:bg-white/10"
+              className="shrink-0 rounded-md px-1.5 py-0.5 text-brand-gray opacity-100 transition-opacity hover:bg-brand-pale/60 dark:hover:bg-white/10 sm:opacity-0 sm:group-hover:opacity-100"
               aria-label="Mais opcoes"
             >
               ⋮
@@ -351,7 +351,7 @@ export function FileGrid({
                 setOpenMenuId(openMenuId === file.id ? null : file.id);
               }}
               data-item-menu-trigger
-              className="shrink-0 rounded-md px-1.5 py-0.5 text-brand-gray opacity-0 transition-opacity hover:bg-brand-pale/60 group-hover:opacity-100 dark:hover:bg-white/10"
+              className="shrink-0 rounded-md px-1.5 py-0.5 text-brand-gray opacity-100 transition-opacity hover:bg-brand-pale/60 dark:hover:bg-white/10 sm:opacity-0 sm:group-hover:opacity-100"
               aria-label="Mais opcoes"
             >
               ⋮

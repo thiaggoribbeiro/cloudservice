@@ -59,7 +59,7 @@ export function CreateFolderDialog({
           <button
             type="button"
             onClick={() => setLocked((l) => !l)}
-            className="flex items-center gap-3 rounded-lg border border-brand-border px-3.5 py-2.5 text-left transition-colors dark:border-white/10"
+            className="flex items-start gap-3 rounded-lg border border-brand-border px-3.5 py-2.5 text-left transition-colors dark:border-white/10 sm:items-center"
           >
             <LockIcon
               className={`h-[18px] w-[18px] shrink-0 ${locked ? "text-brand-primary" : "text-brand-gray"}`}
@@ -88,11 +88,11 @@ export function CreateFolderDialog({
         )}
 
         {error && <p className="text-sm text-brand-primary">{error}</p>}
-        <div className="flex justify-end gap-2">
-          <button type="button" onClick={onClose} className="btn-ghost border-transparent">
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <button type="button" onClick={onClose} className="btn-ghost w-full border-transparent sm:w-auto">
             Cancelar
           </button>
-          <button type="submit" disabled={mutation.isPending || !name.trim()} className="btn-primary">
+          <button type="submit" disabled={mutation.isPending || !name.trim()} className="btn-primary w-full sm:w-auto">
             {mutation.isPending ? "Criando…" : "Criar"}
           </button>
         </div>

@@ -38,11 +38,11 @@ export function MainArea({
   }
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
+    <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
       <Topbar path={path} onNavigate={onNavigate} rootLabel={rootLabel} />
 
       <UploadDropzone onUpload={handleUpload}>
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {isLoading ? (
             <p className="eyebrow text-brand-gray">Carregando…</p>
           ) : (

@@ -73,10 +73,10 @@ function App() {
   }
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden">
+    <div className="flex h-screen min-w-0 flex-col overflow-hidden">
       <GlobalTopbar userEmail={session.user.email} profile={profile} onNavigateFolder={handleNavigateFolder} />
 
-      <div className="flex flex-1 gap-6 overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden md:flex-row md:gap-3 lg:gap-6">
         <Sidebar
           view={view}
           path={path}
