@@ -1,8 +1,10 @@
 import { supabase } from "../../lib/supabaseClient";
 import { logEvent } from "../eventLog/eventLogApi";
+import { softDeleteFolder } from "../trash/trashApi";
 import type { Folder, Repository } from "../../types/domain";
 
 export type RepositoryWithRoot = Repository & { root_folder: Folder | null };
+export type RepositoryWithActiveRoot = Repository & { root_folder: Folder };
 
 export async function listRepositories(): Promise<RepositoryWithRoot[]> {
   const { data, error } = await supabase
@@ -10,7 +12,10 @@ export async function listRepositories(): Promise<RepositoryWithRoot[]> {
     .select("*, root_folder:folders!repositories_root_folder_id_fkey(*)")
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return data as unknown as RepositoryWithRoot[];
+
+  return (data as unknown as RepositoryWithRoot[]).filter(
+    (repository) => repository.root_folder !== null && repository.root_folder.deleted_at === null,
+  );
 }
 
 export async function createRepository(
@@ -31,6 +36,42 @@ export async function createRepository(
 
   logEvent("criar_repositorio", "repositorio", name, data.repository_id);
   return { repositoryId: data.repository_id, rootFolder };
+}
+
+export async function renameRepository(
+  repositoryId: string,
+  rootFolderId: string,
+  name: string,
+): Promise<void> {
+  const trimmedName = name.trim();
+  if (!trimmedName) return;
+
+  const { data: current } = await supabase
+    .from("repositories")
+    .select("name")
+    .eq("id", repositoryId)
+    .single();
+
+  const { error: folderError } = await supabase
+    .from("folders")
+    .update({ name: trimmedName })
+    .eq("id", rootFolderId);
+  if (folderError) throw folderError;
+
+  const { error } = await supabase
+    .from("repositories")
+    .update({ name: trimmedName })
+    .eq("id", repositoryId);
+  if (error) throw error;
+
+  logEvent("renomear_repositorio", "repositorio", trimmedName, repositoryId, { previous_name: current?.name });
+}
+
+export async function deleteRepository(repository: RepositoryWithActiveRoot): Promise<void> {
+  await softDeleteFolder(repository.root_folder.id);
+  logEvent("excluir_repositorio", "repositorio", repository.name, repository.id, {
+    root_folder_id: repository.root_folder.id,
+  });
 }
 
 export async function updateRepositoryQuota(repositoryId: string, quotaBytes: number): Promise<void> {

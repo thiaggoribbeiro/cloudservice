@@ -1,14 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Topbar } from "../../components/layout/Topbar";
 import { MainArea } from "../../components/layout/MainArea";
 import { EmptyState } from "../../components/ui/EmptyState";
+import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { ShareDialog } from "../sharing/ShareDialog";
+import { RenameDialog } from "../folders/RenameDialog";
 import { CreateRepositoryDialog } from "./CreateRepositoryDialog";
 import {
   listRepositories,
   getRepositoryUsage,
   updateRepositoryQuota,
+  renameRepository,
+  deleteRepository,
   REPOSITORY_QUOTA_MIN_BYTES,
   REPOSITORY_QUOTA_MAX_BYTES,
   type RepositoryWithRoot,
@@ -19,18 +23,30 @@ import type { CreateActionTarget, Folder, UserRole } from "../../types/domain";
 
 const GIB = 1073741824;
 type AccessibleRepository = RepositoryWithRoot & { root_folder: Folder };
+type RepositoryDialog =
+  | { kind: "rename"; repository: AccessibleRepository }
+  | { kind: "delete"; repository: AccessibleRepository };
 
 function RepositoryRow({
   repository,
+  menuOpen,
+  onToggleMenu,
   onOpen,
   onInvite,
+  onRename,
+  onDelete,
 }: {
   repository: RepositoryWithRoot;
+  menuOpen: boolean;
+  onToggleMenu: () => void;
   onOpen: () => void;
   onInvite: () => void;
+  onRename: () => void;
+  onDelete: () => void;
 }) {
   const queryClient = useQueryClient();
   const [quotaInput, setQuotaInput] = useState((repository.quota_bytes / GIB).toString());
+  const hasRootFolder = !!repository.root_folder;
 
   const { data: usage } = useQuery({
     queryKey: ["repositoryUsage", repository.id],
@@ -69,15 +85,58 @@ function RepositoryRow({
             {repository.name}
           </span>
         </button>
-        <button
-          type="button"
-          onClick={onInvite}
-          disabled={!repository.root_folder}
-          className="btn-ghost shrink-0 px-3 py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-45"
-          title={repository.root_folder ? undefined : "Pasta raiz indisponivel"}
-        >
-          Convidar
-        </button>
+
+        <div className="flex shrink-0 items-center gap-1.5">
+          <button
+            type="button"
+            onClick={onInvite}
+            disabled={!hasRootFolder}
+            className="btn-ghost shrink-0 px-3 py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-45"
+            title={hasRootFolder ? undefined : "Pasta raiz indisponivel"}
+          >
+            Convidar
+          </button>
+
+          <div className="relative">
+            <button
+              type="button"
+              data-item-menu-trigger
+              onClick={(event) => {
+                event.stopPropagation();
+                onToggleMenu();
+              }}
+              disabled={!hasRootFolder}
+              className="flex h-8 w-8 items-center justify-center rounded-md text-lg leading-none text-brand-gray transition-colors hover:bg-brand-pale/60 hover:text-brand-black disabled:cursor-not-allowed disabled:opacity-45 dark:hover:bg-white/10 dark:hover:text-white"
+              aria-label="Mais opcoes do repositorio"
+              title="Mais opcoes"
+            >
+              ⋮
+            </button>
+
+            {menuOpen && (
+              <div
+                data-item-menu
+                className="stagger-0 absolute right-0 top-full z-20 mt-1 w-44 overflow-hidden rounded-lg border border-brand-border bg-white py-1 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.35)] dark:border-white/10 dark:bg-dark-surface"
+              >
+                <button
+                  type="button"
+                  onClick={onRename}
+                  className="block w-full px-3.5 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
+                >
+                  Renomear
+                </button>
+                <div className="my-1 border-t border-brand-border dark:border-white/10" />
+                <button
+                  type="button"
+                  onClick={onDelete}
+                  className="block w-full px-3.5 py-2 text-left text-sm text-brand-primary transition-colors hover:bg-brand-pale/50 dark:hover:bg-white/10"
+                >
+                  Excluir
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       <div>
@@ -137,11 +196,38 @@ export function RepositoriesView({
   const [selectedRepo, setSelectedRepo] = useState<AccessibleRepository | null>(null);
   const [subPath, setSubPath] = useState<Folder[]>([]);
   const [openError, setOpenError] = useState<string | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [repositoryDialog, setRepositoryDialog] = useState<RepositoryDialog | null>(null);
   const queryClient = useQueryClient();
 
   const { data: repositories = [], isLoading } = useQuery({
     queryKey: ["repositories"],
     queryFn: listRepositories,
+  });
+
+  useEffect(() => {
+    if (!openMenuId) return;
+    function handlePointerDown(event: MouseEvent) {
+      const target = event.target as HTMLElement;
+      if (target.closest("[data-item-menu]") || target.closest("[data-item-menu-trigger]")) return;
+      setOpenMenuId(null);
+    }
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [openMenuId]);
+
+  function invalidateRepositoryViews(repositoryId?: string) {
+    queryClient.invalidateQueries({ queryKey: ["repositories"] });
+    queryClient.invalidateQueries({ queryKey: ["folderChildren"] });
+    queryClient.invalidateQueries({ queryKey: ["files"] });
+    queryClient.invalidateQueries({ queryKey: ["storageUsage"] });
+    queryClient.invalidateQueries({ queryKey: ["repositoryUsage"] });
+    if (repositoryId) queryClient.invalidateQueries({ queryKey: ["repositoryUsage", repositoryId] });
+  }
+
+  const deleteRepositoryMutation = useMutation({
+    mutationFn: deleteRepository,
+    onSuccess: (_, repository) => invalidateRepositoryViews(repository.id),
   });
 
   function publishActionTarget(folder: Folder | null) {
@@ -155,7 +241,7 @@ export function RepositoriesView({
     );
   }
 
-  function openRepository(repository: RepositoryWithRoot) {
+  function requireRoot(repository: RepositoryWithRoot, action: (repository: AccessibleRepository) => void) {
     if (!repository.root_folder) {
       setSelectedRepo(null);
       setSubPath([]);
@@ -165,9 +251,15 @@ export function RepositoriesView({
     }
 
     setOpenError(null);
-    setSelectedRepo(repository as AccessibleRepository);
-    setSubPath([]);
-    publishActionTarget(repository.root_folder);
+    action(repository as AccessibleRepository);
+  }
+
+  function openRepository(repository: RepositoryWithRoot) {
+    requireRoot(repository, (accessibleRepository) => {
+      setSelectedRepo(accessibleRepository);
+      setSubPath([]);
+      publishActionTarget(accessibleRepository.root_folder);
+    });
   }
 
   if (selectedRepo) {
@@ -223,9 +315,17 @@ export function RepositoriesView({
               <RepositoryRow
                 key={repository.id}
                 repository={repository}
+                menuOpen={openMenuId === repository.id}
+                onToggleMenu={() => setOpenMenuId((current) => (current === repository.id ? null : repository.id))}
                 onOpen={() => openRepository(repository)}
-                onInvite={() => {
-                  if (repository.root_folder) setInviteTarget(repository.root_folder);
+                onInvite={() => requireRoot(repository, (repo) => setInviteTarget(repo.root_folder))}
+                onRename={() => {
+                  setOpenMenuId(null);
+                  requireRoot(repository, (repo) => setRepositoryDialog({ kind: "rename", repository: repo }));
+                }}
+                onDelete={() => {
+                  setOpenMenuId(null);
+                  requireRoot(repository, (repo) => setRepositoryDialog({ kind: "delete", repository: repo }));
                 }}
               />
             ))}
@@ -249,6 +349,28 @@ export function RepositoriesView({
           target={{ kind: "folder", folder: inviteTarget }}
           currentUserId={userId}
           onClose={() => setInviteTarget(null)}
+        />
+      )}
+
+      {repositoryDialog?.kind === "rename" && (
+        <RenameDialog
+          title="Renomear repositorio"
+          currentName={repositoryDialog.repository.name}
+          invalidateKeys={[["repositories"], ["repositoryUsage", repositoryDialog.repository.id]]}
+          onRename={(name) =>
+            renameRepository(repositoryDialog.repository.id, repositoryDialog.repository.root_folder.id, name)
+          }
+          onClose={() => setRepositoryDialog(null)}
+        />
+      )}
+
+      {repositoryDialog?.kind === "delete" && (
+        <ConfirmDialog
+          title="Excluir repositorio"
+          message={`O repositorio "${repositoryDialog.repository.name}" e todo o seu conteudo serao movidos para a lixeira.`}
+          confirmLabel={deleteRepositoryMutation.isPending ? "Excluindo..." : "Excluir"}
+          onConfirm={() => deleteRepositoryMutation.mutate(repositoryDialog.repository)}
+          onClose={() => setRepositoryDialog(null)}
         />
       )}
     </div>
