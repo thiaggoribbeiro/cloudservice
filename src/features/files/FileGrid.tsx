@@ -42,9 +42,9 @@ function ItemMenu({
   onOpen,
   onClose,
 }: {
-  onRename: () => void;
-  onMove: () => void;
-  onShare: () => void;
+  onRename?: () => void;
+  onMove?: () => void;
+  onShare?: () => void;
   onDownload?: () => void;
   onToggleFavorite: () => void;
   isFavorited: boolean;
@@ -83,36 +83,42 @@ function ItemMenu({
       >
         {isFavorited ? "Remover dos favoritos" : "Favoritar"}
       </button>
-      <button
-        type="button"
-        onClick={() => {
-          onShare();
-          onClose();
-        }}
-        className="block w-full px-3.5 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
-      >
-        Compartilhar
-      </button>
-      <button
-        type="button"
-        onClick={() => {
-          onRename();
-          onClose();
-        }}
-        className="block w-full px-3.5 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
-      >
-        Renomear
-      </button>
-      <button
-        type="button"
-        onClick={() => {
-          onMove();
-          onClose();
-        }}
-        className="block w-full px-3.5 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
-      >
-        Mover
-      </button>
+      {onShare && (
+        <button
+          type="button"
+          onClick={() => {
+            onShare();
+            onClose();
+          }}
+          className="block w-full px-3.5 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
+        >
+          Compartilhar
+        </button>
+      )}
+      {onRename && (
+        <button
+          type="button"
+          onClick={() => {
+            onRename();
+            onClose();
+          }}
+          className="block w-full px-3.5 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
+        >
+          Renomear
+        </button>
+      )}
+      {onMove && (
+        <button
+          type="button"
+          onClick={() => {
+            onMove();
+            onClose();
+          }}
+          className="block w-full px-3.5 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
+        >
+          Mover
+        </button>
+      )}
       {onToggleLock && (
         <button
           type="button"
@@ -284,9 +290,21 @@ export function FileGrid({
             <ItemMenu
               onOpen={openMenuId === folder.id}
               onClose={() => setOpenMenuId(null)}
-              onRename={() => setDialog({ kind: "rename-folder", folder })}
-              onMove={() => setDialog({ kind: "move-folder", folder })}
-              onShare={() => setDialog({ kind: "share-folder", folder })}
+              onRename={
+                userRole === "guest" && !!folder.repository_id && folder.is_locked
+                  ? undefined
+                  : () => setDialog({ kind: "rename-folder", folder })
+              }
+              onMove={
+                userRole === "guest" && !!folder.repository_id && folder.is_locked
+                  ? undefined
+                  : () => setDialog({ kind: "move-folder", folder })
+              }
+              onShare={
+                userRole === "guest" && !!folder.repository_id && folder.is_locked
+                  ? undefined
+                  : () => setDialog({ kind: "share-folder", folder })
+              }
               onToggleFavorite={() => favoriteFolderMutation.mutate(folder)}
               isFavorited={!!favoriteIds?.folderIds.has(folder.id)}
               onToggleLock={
@@ -296,6 +314,7 @@ export function FileGrid({
               }
               isLocked={folder.is_locked}
               onDelete={
+                !(userRole === "guest" && !!folder.repository_id && folder.is_locked) &&
                 canDelete(folder.owner_id, folder.is_locked)
                   ? () => deleteFolderMutation.mutate(folder.id)
                   : undefined

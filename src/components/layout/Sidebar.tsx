@@ -86,6 +86,7 @@ export function Sidebar({
   const canManageMembers = role === "admin" || role === "manager";
   const hasContextualTarget = actionTarget !== undefined && actionTarget !== null;
   const canUseCreateMenu = !isGuest || hasContextualTarget;
+  const activeRepositoryId = actionTarget === undefined ? null : actionTarget?.repositoryId ?? null;
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [showCreateFolder, setShowCreateFolder] = useState(false);
@@ -284,7 +285,7 @@ export function Sidebar({
         </div>
       </nav>
 
-      {!isGuest && <StorageUsageIndicator userId={userId} />}
+      <StorageUsageIndicator userId={!isGuest ? userId : undefined} repositoryId={activeRepositoryId} />
 
       {showCreateFolder && (
         <CreateFolderDialog

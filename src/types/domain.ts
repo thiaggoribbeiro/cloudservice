@@ -12,6 +12,7 @@ export type UserRole = Enums<"user_role">;
 
 export type CreateActionTarget = {
   folderId: string | null;
+  repositoryId?: string | null;
   allowLock?: boolean;
 };
 

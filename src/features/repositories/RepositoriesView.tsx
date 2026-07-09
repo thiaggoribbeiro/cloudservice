@@ -235,6 +235,7 @@ export function RepositoriesView({
       folder
         ? {
             folderId: folder.id,
+            repositoryId: folder.repository_id,
             allowLock: !!folder.repository_id && (userRole === "admin" || userRole === "manager"),
           }
         : null,
