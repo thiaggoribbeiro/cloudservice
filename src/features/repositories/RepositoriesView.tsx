@@ -15,9 +15,10 @@ import {
 } from "./repositoryApi";
 import { formatBytes } from "../../lib/format";
 import { RepositoryIcon } from "../../components/ui/icons";
-import type { Folder, UserRole } from "../../types/domain";
+import type { CreateActionTarget, Folder, UserRole } from "../../types/domain";
 
 const GIB = 1073741824;
+type AccessibleRepository = RepositoryWithRoot & { root_folder: Folder };
 
 function RepositoryRow({
   repository,
@@ -68,7 +69,13 @@ function RepositoryRow({
             {repository.name}
           </span>
         </button>
-        <button type="button" onClick={onInvite} className="btn-ghost shrink-0 px-3 py-1.5 text-sm">
+        <button
+          type="button"
+          onClick={onInvite}
+          disabled={!repository.root_folder}
+          className="btn-ghost shrink-0 px-3 py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-45"
+          title={repository.root_folder ? undefined : "Pasta raiz indisponivel"}
+        >
           Convidar
         </button>
       </div>
@@ -116,17 +123,52 @@ function RepositoryRow({
   );
 }
 
-export function RepositoriesView({ userId, userRole }: { userId: string; userRole: UserRole }) {
+export function RepositoriesView({
+  userId,
+  userRole,
+  onActionTargetChange,
+}: {
+  userId: string;
+  userRole: UserRole;
+  onActionTargetChange?: (target: CreateActionTarget | null) => void;
+}) {
   const [showCreate, setShowCreate] = useState(false);
   const [inviteTarget, setInviteTarget] = useState<Folder | null>(null);
-  const [selectedRepo, setSelectedRepo] = useState<RepositoryWithRoot | null>(null);
+  const [selectedRepo, setSelectedRepo] = useState<AccessibleRepository | null>(null);
   const [subPath, setSubPath] = useState<Folder[]>([]);
+  const [openError, setOpenError] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const { data: repositories = [], isLoading } = useQuery({
     queryKey: ["repositories"],
     queryFn: listRepositories,
   });
+
+  function publishActionTarget(folder: Folder | null) {
+    onActionTargetChange?.(
+      folder
+        ? {
+            folderId: folder.id,
+            allowLock: !!folder.repository_id && (userRole === "admin" || userRole === "manager"),
+          }
+        : null,
+    );
+  }
+
+  function openRepository(repository: RepositoryWithRoot) {
+    if (!repository.root_folder) {
+      setSelectedRepo(null);
+      setSubPath([]);
+      publishActionTarget(null);
+      setOpenError("Nao foi possivel abrir a pasta raiz deste repositorio. Verifique as permissoes do repositorio.");
+      return;
+    }
+
+    setOpenError(null);
+    setSelectedRepo(repository as AccessibleRepository);
+    setSubPath([]);
+    publishActionTarget(repository.root_folder);
+  }
 
   if (selectedRepo) {
     return (
@@ -139,9 +181,11 @@ export function RepositoriesView({ userId, userRole }: { userId: string; userRol
           if (newPath.length === 0) {
             setSelectedRepo(null);
             setSubPath([]);
+            publishActionTarget(null);
             return;
           }
           setSubPath(newPath.slice(1));
+          publishActionTarget(newPath[newPath.length - 1]);
         }}
       />
     );
@@ -161,6 +205,11 @@ export function RepositoriesView({ userId, userRole }: { userId: string; userRol
       </div>
 
       <div className="flex-1 overflow-y-auto p-6">
+        {openError && (
+          <div className="mb-4 rounded-lg border border-brand-primary/25 bg-brand-primary/10 px-4 py-3 text-sm text-brand-black dark:text-white">
+            {openError}
+          </div>
+        )}
         {isLoading ? (
           <p className="eyebrow text-brand-gray">Carregando…</p>
         ) : repositories.length === 0 ? (
@@ -174,8 +223,10 @@ export function RepositoriesView({ userId, userRole }: { userId: string; userRol
               <RepositoryRow
                 key={repository.id}
                 repository={repository}
-                onOpen={() => setSelectedRepo(repository)}
-                onInvite={() => setInviteTarget(repository.root_folder)}
+                onOpen={() => openRepository(repository)}
+                onInvite={() => {
+                  if (repository.root_folder) setInviteTarget(repository.root_folder);
+                }}
               />
             ))}
           </div>

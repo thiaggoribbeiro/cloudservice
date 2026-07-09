@@ -1,7 +1,7 @@
 import { supabase } from "../../lib/supabaseClient";
 import type { Folder, Repository } from "../../types/domain";
 
-export type RepositoryWithRoot = Repository & { root_folder: Folder };
+export type RepositoryWithRoot = Repository & { root_folder: Folder | null };
 
 export async function listRepositories(): Promise<RepositoryWithRoot[]> {
   const { data, error } = await supabase

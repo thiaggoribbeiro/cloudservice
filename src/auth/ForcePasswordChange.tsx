@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { useAuth } from "./useAuth";
-import { LockIcon } from "../components/ui/icons";
+import { PasswordField } from "./PasswordField";
 
 export function ForcePasswordChange() {
   const { session, refreshProfile } = useAuth();
@@ -63,42 +63,24 @@ export function ForcePasswordChange() {
           </p>
 
           <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-6">
-            <div className="stagger-2 flex flex-col gap-1">
-              <label htmlFor="new-password" className="eyebrow text-brand-gray">
-                Nova senha
-              </label>
-              <div className="relative">
-                <LockIcon className="field-pill-icon" />
-                <input
-                  id="new-password"
-                  type="password"
-                  required
-                  autoComplete="new-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="field-pill"
-                  placeholder="••••••••"
-                />
-              </div>
+            <div className="stagger-2">
+              <PasswordField
+                id="new-password"
+                label="Nova senha"
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
 
-            <div className="stagger-3 flex flex-col gap-1">
-              <label htmlFor="confirm-password" className="eyebrow text-brand-gray">
-                Confirme a nova senha
-              </label>
-              <div className="relative">
-                <LockIcon className="field-pill-icon" />
-                <input
-                  id="confirm-password"
-                  type="password"
-                  required
-                  autoComplete="new-password"
-                  value={confirm}
-                  onChange={(e) => setConfirm(e.target.value)}
-                  className="field-pill"
-                  placeholder="••••••••"
-                />
-              </div>
+            <div className="stagger-3">
+              <PasswordField
+                id="confirm-password"
+                label="Confirme a nova senha"
+                autoComplete="new-password"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+              />
             </div>
 
             {error && (

@@ -187,8 +187,18 @@
   .field-pill {
     @apply w-full rounded-xl border border-transparent bg-black/[0.04] py-3 pl-11 pr-4 text-base text-brand-black outline-none transition-colors duration-200 placeholder:text-brand-gray/70 focus:border-brand-primary focus:bg-white;
   }
+  .field-pill-with-action {
+    @apply pr-12;
+  }
   .field-pill-icon {
     @apply pointer-events-none absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-brand-gray;
+  }
+  .field-pill-reveal {
+    @apply absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-brand-primary transition-colors hover:bg-brand-pale/60 hover:text-[#7f3712];
+  }
+  .field-pill::-ms-reveal,
+  .field-pill::-ms-clear {
+    display: none;
   }
 
   /* File / folder tile in the main grid (combine with "group" in markup for the hover-revealed menu button) */

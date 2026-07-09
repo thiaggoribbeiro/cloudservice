@@ -5,9 +5,17 @@ import { MainArea } from "../../components/layout/MainArea";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { listSharedWithMe } from "./shareApi";
 import { formatRelativeTime } from "../../lib/format";
-import type { Folder, UserRole } from "../../types/domain";
+import type { CreateActionTarget, Folder, UserRole } from "../../types/domain";
 
-export function SharedWithMeView({ userId, userRole }: { userId: string; userRole: UserRole }) {
+export function SharedWithMeView({
+  userId,
+  userRole,
+  onActionTargetChange,
+}: {
+  userId: string;
+  userRole: UserRole;
+  onActionTargetChange?: (target: CreateActionTarget | null) => void;
+}) {
   const [selectedRoot, setSelectedRoot] = useState<Folder | null>(null);
   const [subPath, setSubPath] = useState<Folder[]>([]);
 
@@ -15,6 +23,17 @@ export function SharedWithMeView({ userId, userRole }: { userId: string; userRol
     queryKey: ["sharedWithMe", userId],
     queryFn: () => listSharedWithMe(userId),
   });
+
+  function publishActionTarget(folder: Folder | null) {
+    onActionTargetChange?.(
+      folder
+        ? {
+            folderId: folder.id,
+            allowLock: !!folder.repository_id && (userRole === "admin" || userRole === "manager"),
+          }
+        : null,
+    );
+  }
 
   if (selectedRoot) {
     return (
@@ -27,10 +46,12 @@ export function SharedWithMeView({ userId, userRole }: { userId: string; userRol
           if (newPath.length === 0) {
             setSelectedRoot(null);
             setSubPath([]);
+            publishActionTarget(null);
             return;
           }
           setSelectedRoot(newPath[0]);
           setSubPath(newPath.slice(1));
+          publishActionTarget(newPath[newPath.length - 1]);
         }}
       />
     );
@@ -57,7 +78,15 @@ export function SharedWithMeView({ userId, userRole }: { userId: string; userRol
             </div>
             <div className="file-list">
               {entries.map(({ folder }) => (
-                <div key={folder.id} onDoubleClick={() => setSelectedRoot(folder)} className="file-row">
+                <div
+                  key={folder.id}
+                  onDoubleClick={() => {
+                    setSelectedRoot(folder);
+                    setSubPath([]);
+                    publishActionTarget(folder);
+                  }}
+                  className="file-row"
+                >
                   <span className="file-row-icon text-brand-primary">📁</span>
                   <span className="min-w-0 flex-1 truncate text-sm font-medium text-brand-black dark:text-white">
                     {folder.name}

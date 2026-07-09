@@ -77,7 +77,7 @@ export function GlobalTopbar({
   const hasResults = !!results && (results.folders.length > 0 || results.files.length > 0);
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-6 bg-brand-border px-6 dark:bg-dark-surface">
+    <header className="flex h-14 shrink-0 items-center gap-6 bg-white px-6 dark:bg-dark-surface">
       <img
         src={theme === "dark" ? "/logo-dark.png" : "/logo-claro.png"}
         alt="AvestaCloud"

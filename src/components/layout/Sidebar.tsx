@@ -16,7 +16,7 @@ import {
   UsersIcon,
   RepositoryIcon,
 } from "../ui/icons";
-import type { Folder, UserRole, ViewSelection } from "../../types/domain";
+import type { CreateActionTarget, Folder, UserRole, ViewSelection } from "../../types/domain";
 
 function NavRow({
   icon,
@@ -53,6 +53,7 @@ export function Sidebar({
   path,
   userId,
   role,
+  actionTarget,
   onNavigateFolder,
   onSelectHome,
   onSelectShared,
@@ -65,6 +66,7 @@ export function Sidebar({
   path: Folder[];
   userId: string;
   role: UserRole;
+  actionTarget?: CreateActionTarget | null;
   onNavigateFolder: (path: Folder[]) => void;
   onSelectHome: () => void;
   onSelectShared: () => void;
@@ -75,9 +77,12 @@ export function Sidebar({
 }) {
   const currentFolderId = path.length ? path[path.length - 1].id : null;
   const isMyDrive = view.kind === "folder";
-  const uploadTargetFolderId = isMyDrive ? currentFolderId : null;
+  const uploadTargetFolderId =
+    actionTarget === undefined ? (isMyDrive ? currentFolderId : null) : actionTarget?.folderId ?? null;
   const isGuest = role === "guest";
   const canManageMembers = role === "admin" || role === "manager";
+  const hasContextualTarget = actionTarget !== undefined && actionTarget !== null;
+  const canUseCreateMenu = !isGuest || hasContextualTarget;
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [showCreateFolder, setShowCreateFolder] = useState(false);
@@ -107,6 +112,7 @@ export function Sidebar({
     queryClient.invalidateQueries({ queryKey: ["folderChildren"] });
     queryClient.invalidateQueries({ queryKey: ["files"] });
     queryClient.invalidateQueries({ queryKey: ["storageUsage"] });
+    queryClient.invalidateQueries({ queryKey: ["repositoryUsage"] });
   }
 
   async function handleFilesSelected(fileList: FileList) {
@@ -125,7 +131,7 @@ export function Sidebar({
 
   return (
     <aside className="flex w-64 shrink-0 flex-col bg-light-canvas pt-4 dark:bg-dark-canvas">
-      {!isGuest && (
+      {canUseCreateMenu && (
         <div className="relative px-3 pb-4">
           <button
             type="button"
@@ -176,17 +182,19 @@ export function Sidebar({
                 <FolderIcon className="h-[18px] w-[18px] text-brand-gray" />
                 Criar pasta
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowCreateSharedFolder(true);
-                  setMenuOpen(false);
-                }}
-                className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
-              >
-                <UsersIcon className="h-[18px] w-[18px] text-brand-gray" />
-                Criar pasta compartilhada
-              </button>
+              {!isGuest && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreateSharedFolder(true);
+                    setMenuOpen(false);
+                  }}
+                  className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
+                >
+                  <UsersIcon className="h-[18px] w-[18px] text-brand-gray" />
+                  Criar pasta compartilhada
+                </button>
+              )}
             </div>
           )}
 
@@ -276,6 +284,7 @@ export function Sidebar({
           parentId={uploadTargetFolderId}
           ownerId={userId}
           invalidateKeys={createFolderInvalidateKeys}
+          allowLock={actionTarget?.allowLock}
           onCreated={() => setShowCreateFolder(false)}
           onClose={() => setShowCreateFolder(false)}
         />
@@ -287,6 +296,7 @@ export function Sidebar({
           parentId={uploadTargetFolderId}
           ownerId={userId}
           invalidateKeys={createFolderInvalidateKeys}
+          allowLock={actionTarget?.allowLock}
           onCreated={(folder) => {
             setShowCreateSharedFolder(false);
             setShareTarget(folder);

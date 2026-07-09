@@ -12,7 +12,7 @@ import { PublicShareView } from "./features/sharing/PublicShareView";
 import { TrashView } from "./features/trash/TrashView";
 import { MembersView } from "./features/members/MembersView";
 import { RepositoriesView } from "./features/repositories/RepositoriesView";
-import type { Folder, ViewSelection } from "./types/domain";
+import type { CreateActionTarget, Folder, ViewSelection } from "./types/domain";
 
 const publicShareMatch = window.location.pathname.match(/^\/s\/(.+)$/);
 
@@ -20,6 +20,7 @@ function App() {
   const { session, profile, loading } = useAuth();
   const [view, setView] = useState<ViewSelection>({ kind: "home" });
   const [path, setPath] = useState<Folder[]>([]);
+  const [createActionTarget, setCreateActionTarget] = useState<CreateActionTarget | null>(null);
   const lastUserId = useRef<string | null | undefined>(undefined);
 
   const isGuest = profile?.role === "guest";
@@ -33,6 +34,7 @@ function App() {
     if (lastUserId.current !== undefined && lastUserId.current !== userId) {
       setView({ kind: "home" });
       setPath([]);
+      setCreateActionTarget(null);
     }
     lastUserId.current = userId;
   }, [session?.user.id]);
@@ -65,6 +67,7 @@ function App() {
 
   function handleNavigateFolder(newPath: Folder[]) {
     setPath(newPath);
+    setCreateActionTarget(null);
     setView({ kind: "folder", folderId: newPath.length ? newPath[newPath.length - 1].id : null });
   }
 
@@ -78,13 +81,20 @@ function App() {
           path={path}
           userId={session.user.id}
           role={profile?.role ?? "user"}
+          actionTarget={view.kind === "shared" || view.kind === "repositories" ? createActionTarget : undefined}
           onNavigateFolder={handleNavigateFolder}
           onSelectHome={() => setView({ kind: "home" })}
-          onSelectShared={() => setView({ kind: "shared" })}
+          onSelectShared={() => {
+            setCreateActionTarget(null);
+            setView({ kind: "shared" });
+          }}
           onSelectFavorites={() => setView({ kind: "favorites" })}
           onSelectTrash={() => setView({ kind: "trash" })}
           onSelectMembers={() => setView({ kind: "members" })}
-          onSelectRepositories={() => setView({ kind: "repositories" })}
+          onSelectRepositories={() => {
+            setCreateActionTarget(null);
+            setView({ kind: "repositories" });
+          }}
         />
 
         {view.kind === "home" && <HomeView ownerId={session.user.id} />}
@@ -100,7 +110,11 @@ function App() {
         )}
 
         {view.kind === "shared" && (
-          <SharedWithMeView userId={session.user.id} userRole={profile?.role ?? "user"} />
+          <SharedWithMeView
+            userId={session.user.id}
+            userRole={profile?.role ?? "user"}
+            onActionTargetChange={setCreateActionTarget}
+          />
         )}
 
         {view.kind === "favorites" && (
@@ -118,7 +132,11 @@ function App() {
         )}
 
         {view.kind === "repositories" && (profile?.role === "admin" || profile?.role === "manager") && (
-          <RepositoriesView userId={session.user.id} userRole={profile?.role ?? "user"} />
+          <RepositoriesView
+            userId={session.user.id}
+            userRole={profile?.role ?? "user"}
+            onActionTargetChange={setCreateActionTarget}
+          />
         )}
       </div>
     </div>

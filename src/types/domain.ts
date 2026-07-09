@@ -9,6 +9,11 @@ export type Favorite = Tables<"favorites">;
 export type Repository = Tables<"repositories">;
 export type UserRole = Enums<"user_role">;
 
+export type CreateActionTarget = {
+  folderId: string | null;
+  allowLock?: boolean;
+};
+
 export type ViewSelection =
   | { kind: "home" }
   | { kind: "folder"; folderId: string | null }

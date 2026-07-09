@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { supabase } from "../lib/supabaseClient";
-import { MailIcon, LockIcon } from "../components/ui/icons";
+import { MailIcon } from "../components/ui/icons";
 import { APP_VERSION } from "../lib/constants";
+import { PasswordField } from "./PasswordField";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -71,23 +72,14 @@ export function LoginForm() {
               </div>
             </div>
 
-            <div className="stagger-3 flex flex-col gap-1">
-              <label htmlFor="password" className="eyebrow text-brand-gray">
-                Senha
-              </label>
-              <div className="relative">
-                <LockIcon className="field-pill-icon" />
-                <input
-                  id="password"
-                  type="password"
-                  required
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="field-pill"
-                  placeholder="••••••••"
-                />
-              </div>
+            <div className="stagger-3">
+              <PasswordField
+                id="password"
+                label="Senha"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
 
             {error && (

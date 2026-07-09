@@ -148,6 +148,25 @@ export function LockIcon(props: IconProps) {
   );
 }
 
+export function EyeIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M2.8 12s3.2-5.8 9.2-5.8 9.2 5.8 9.2 5.8-3.2 5.8-9.2 5.8S2.8 12 2.8 12Z" />
+      <circle cx="12" cy="12" r="2.8" />
+    </svg>
+  );
+}
+
+export function EyeOffIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="m3.5 3.5 17 17" />
+      <path d="M9.6 5.7A8.6 8.6 0 0 1 12 5.3c6 0 9.2 6.7 9.2 6.7a16 16 0 0 1-2.7 3.7" />
+      <path d="M6.2 7.5A16.5 16.5 0 0 0 2.8 12s3.2 6.7 9.2 6.7a8.5 8.5 0 0 0 3.8-.9" />
+      <path d="M9.8 9.8a3 3 0 0 0 4.4 4.4" />
+    </svg>
+  );
+}
 // A stored-away archive crate - deliberately distinct from FolderIcon, since
 // a repositorio is a different kind of space (shared, quota-managed) rather
 // than just another folder.
