@@ -9,6 +9,7 @@ import { downloadFile } from "../../features/files/fileApi";
 import { PreviewModal } from "../../features/files/PreviewModal";
 import { useTheme } from "../../lib/useTheme";
 import { SearchIcon, FolderIcon, SunIcon, MoonIcon } from "../ui/icons";
+import { logEvent } from "../../features/eventLog/eventLogApi";
 import type { FileRow, Folder, Profile } from "../../types/domain";
 
 function getInitials(name: string | null | undefined, email: string | undefined): string {
@@ -192,7 +193,10 @@ export function GlobalTopbar({
             <div className="mt-4 border-t border-brand-border pt-4 dark:border-white/10">
               <button
                 type="button"
-                onClick={() => supabase.auth.signOut()}
+                onClick={async () => {
+                  await logEvent("logout", "sessao", userEmail);
+                  supabase.auth.signOut();
+                }}
                 className="btn-ghost w-full py-2 text-sm"
               >
                 Sair

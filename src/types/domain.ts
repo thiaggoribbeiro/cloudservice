@@ -7,6 +7,7 @@ export type ShareLink = Tables<"share_links">;
 export type Profile = Tables<"profiles">;
 export type Favorite = Tables<"favorites">;
 export type Repository = Tables<"repositories">;
+export type EventLog = Tables<"event_logs">;
 export type UserRole = Enums<"user_role">;
 
 export type CreateActionTarget = {
@@ -21,4 +22,5 @@ export type ViewSelection =
   | { kind: "favorites" }
   | { kind: "trash" }
   | { kind: "members" }
-  | { kind: "repositories" };
+  | { kind: "repositories" }
+  | { kind: "eventLog" };

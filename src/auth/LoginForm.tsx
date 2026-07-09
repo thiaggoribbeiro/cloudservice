@@ -3,6 +3,7 @@ import { supabase } from "../lib/supabaseClient";
 import { MailIcon } from "../components/ui/icons";
 import { APP_VERSION } from "../lib/constants";
 import { PasswordField } from "./PasswordField";
+import { logEvent } from "../features/eventLog/eventLogApi";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -24,6 +25,8 @@ export function LoginForm() {
 
     if (signInError) {
       setError("E-mail ou senha invalidos.");
+    } else {
+      logEvent("login", "sessao", email);
     }
   }
 

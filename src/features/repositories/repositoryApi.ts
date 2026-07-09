@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { logEvent } from "../eventLog/eventLogApi";
 import type { Folder, Repository } from "../../types/domain";
 
 export type RepositoryWithRoot = Repository & { root_folder: Folder | null };
@@ -28,15 +29,22 @@ export async function createRepository(
     .single();
   if (folderError) throw folderError;
 
+  logEvent("criar_repositorio", "repositorio", name, data.repository_id);
   return { repositoryId: data.repository_id, rootFolder };
 }
 
 export async function updateRepositoryQuota(repositoryId: string, quotaBytes: number): Promise<void> {
+  const { data: current } = await supabase
+    .from("repositories")
+    .select("name")
+    .eq("id", repositoryId)
+    .single();
   const { error } = await supabase
     .from("repositories")
     .update({ quota_bytes: quotaBytes })
     .eq("id", repositoryId);
   if (error) throw error;
+  logEvent("editar_cota_repositorio", "repositorio", current?.name, repositoryId, { quota_bytes: quotaBytes });
 }
 
 export async function getRepositoryUsage(

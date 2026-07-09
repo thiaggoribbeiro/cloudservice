@@ -12,6 +12,7 @@ import { PublicShareView } from "./features/sharing/PublicShareView";
 import { TrashView } from "./features/trash/TrashView";
 import { MembersView } from "./features/members/MembersView";
 import { RepositoriesView } from "./features/repositories/RepositoriesView";
+import { EventLogView } from "./features/eventLog/EventLogView";
 import type { CreateActionTarget, Folder, ViewSelection } from "./types/domain";
 
 const publicShareMatch = window.location.pathname.match(/^\/s\/(.+)$/);
@@ -95,6 +96,7 @@ function App() {
             setCreateActionTarget(null);
             setView({ kind: "repositories" });
           }}
+          onSelectEventLog={() => setView({ kind: "eventLog" })}
         />
 
         {view.kind === "home" && <HomeView ownerId={session.user.id} />}
@@ -137,6 +139,10 @@ function App() {
             userRole={profile?.role ?? "user"}
             onActionTargetChange={setCreateActionTarget}
           />
+        )}
+
+        {view.kind === "eventLog" && (profile?.role === "admin" || profile?.role === "manager") && (
+          <EventLogView />
         )}
       </div>
     </div>

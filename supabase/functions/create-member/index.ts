@@ -21,6 +21,25 @@ function json(body: unknown, status = 200) {
   });
 }
 
+// Uses the caller's own JWT-scoped client (not the service-role `admin`
+// client) so log_event()'s auth.uid() resolves to the admin/manager who
+// triggered the action, and its admin-skip rule applies the same way it
+// does everywhere else in the app.
+async function logMemberEvent(
+  caller: ReturnType<typeof createClient>,
+  action: string,
+  targetName: string | undefined,
+  targetId: string | undefined,
+): Promise<void> {
+  const { error } = await caller.rpc("log_event", {
+    p_action: action,
+    p_target_type: "membro",
+    p_target_name: targetName,
+    p_target_id: targetId,
+  });
+  if (error) console.error("Falha ao registrar evento:", error.message);
+}
+
 // Cryptographically random, unambiguous-alphabet temporary password. Shown
 // once to the admin/manager who created/reset the account so they can hand
 // it to the member; the member is forced to replace it on next login.
@@ -169,6 +188,7 @@ Deno.serve(async (req: Request) => {
       }
     }
 
+    await logMemberEvent(caller, "criar_membro", display_name, newUserId);
     return json({ user_id: newUserId, email, temporary_password: temporaryPassword });
   }
 
@@ -207,6 +227,7 @@ Deno.serve(async (req: Request) => {
       .eq("id", targetUserId);
     if (updateError) return json({ error: updateError.message }, 400);
 
+    await logMemberEvent(caller, "editar_membro", display_name, targetUserId);
     return json({ user_id: targetUserId });
   }
 
@@ -225,12 +246,14 @@ Deno.serve(async (req: Request) => {
       .eq("id", targetUserId);
     if (profileUpdateError) return json({ error: profileUpdateError.message }, 500);
 
+    await logMemberEvent(caller, "resetar_senha_membro", targetProfile.email, targetUserId);
     return json({ user_id: targetUserId, email: targetProfile.email, temporary_password: temporaryPassword });
   }
 
   // ---- delete: remove the account entirely (cascades to their owned
   // folders/files/shares via FK constraints).
   if (action === "delete") {
+    await logMemberEvent(caller, "excluir_membro", targetProfile.email, targetUserId);
     const { error: deleteError } = await admin.auth.admin.deleteUser(targetUserId);
     if (deleteError) return json({ error: deleteError.message }, 400);
     return json({ user_id: targetUserId });

@@ -1,6 +1,7 @@
 import { supabase } from "../../lib/supabaseClient";
 import { STORAGE_BUCKET } from "../../lib/constants";
 import { listFolders, createFolder } from "../folders/folderApi";
+import { logEvent } from "../eventLog/eventLogApi";
 import type { FileRow } from "../../types/domain";
 
 export async function listFiles(folderId: string | null): Promise<FileRow[]> {
@@ -45,6 +46,7 @@ export async function uploadFile(
     throw error;
   }
 
+  logEvent("upload_arquivo", "arquivo", data.name, data.id);
   return data;
 }
 
@@ -90,6 +92,7 @@ export async function downloadFile(file: FileRow): Promise<void> {
   if (error) throw error;
 
   touchLastAccessed(file.id);
+  logEvent("download_arquivo", "arquivo", file.name, file.id);
 
   const url = URL.createObjectURL(data);
   const anchor = document.createElement("a");
@@ -125,9 +128,12 @@ function touchLastAccessed(fileId: string): void {
 export async function renameFile(id: string, name: string): Promise<void> {
   const { error } = await supabase.from("files").update({ name }).eq("id", id);
   if (error) throw error;
+  logEvent("renomear_arquivo", "arquivo", name, id);
 }
 
 export async function moveFile(id: string, newFolderId: string | null): Promise<void> {
+  const { data: current } = await supabase.from("files").select("name").eq("id", id).single();
   const { error } = await supabase.from("files").update({ folder_id: newFolderId }).eq("id", id);
   if (error) throw error;
+  logEvent("mover_arquivo", "arquivo", current?.name, id);
 }

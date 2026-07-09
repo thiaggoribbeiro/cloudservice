@@ -179,3 +179,12 @@ export function RepositoryIcon(props: IconProps) {
     </svg>
   );
 }
+
+export function EventLogIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M8.5 4.5h7A1.5 1.5 0 0 1 17 6v13.5a1 1 0 0 1-1.5.9L12 18.5l-3.5 1.9a1 1 0 0 1-1.5-.9V6a1.5 1.5 0 0 1 1.5-1.5Z" />
+      <path d="M10 8.5h4M10 11.5h4M10 14.5h2.5" />
+    </svg>
+  );
+}

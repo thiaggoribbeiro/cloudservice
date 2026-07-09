@@ -15,6 +15,7 @@ import {
   TrashIcon,
   UsersIcon,
   RepositoryIcon,
+  EventLogIcon,
 } from "../ui/icons";
 import type { CreateActionTarget, Folder, UserRole, ViewSelection } from "../../types/domain";
 
@@ -61,6 +62,7 @@ export function Sidebar({
   onSelectTrash,
   onSelectMembers,
   onSelectRepositories,
+  onSelectEventLog,
 }: {
   view: ViewSelection;
   path: Folder[];
@@ -74,6 +76,7 @@ export function Sidebar({
   onSelectTrash: () => void;
   onSelectMembers: () => void;
   onSelectRepositories: () => void;
+  onSelectEventLog: () => void;
 }) {
   const currentFolderId = path.length ? path[path.length - 1].id : null;
   const isMyDrive = view.kind === "folder";
@@ -269,9 +272,14 @@ export function Sidebar({
             </>
           )}
           {canManageMembers && (
-            <NavRow icon={<UsersIcon className="h-[18px] w-[18px]" />} active={view.kind === "members"} onClick={onSelectMembers}>
-              Membros
-            </NavRow>
+            <>
+              <NavRow icon={<UsersIcon className="h-[18px] w-[18px]" />} active={view.kind === "members"} onClick={onSelectMembers}>
+                Membros
+              </NavRow>
+              <NavRow icon={<EventLogIcon className="h-[18px] w-[18px]" />} active={view.kind === "eventLog"} onClick={onSelectEventLog}>
+                Log de Eventos
+              </NavRow>
+            </>
           )}
         </div>
       </nav>

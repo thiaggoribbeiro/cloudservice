@@ -1,5 +1,6 @@
 import { supabase } from "../../lib/supabaseClient";
 import { STORAGE_BUCKET } from "../../lib/constants";
+import { logEvent } from "../eventLog/eventLogApi";
 import type { Folder, FileRow } from "../../types/domain";
 
 export async function listTrashedFolders(): Promise<Folder[]> {
@@ -23,26 +24,34 @@ export async function listTrashedFiles(): Promise<FileRow[]> {
 }
 
 export async function softDeleteFolder(folderId: string): Promise<void> {
+  const { data: current } = await supabase.from("folders").select("name").eq("id", folderId).single();
   const { error } = await supabase.rpc("soft_delete_folder", { p_folder_id: folderId });
   if (error) throw error;
+  logEvent("mover_pasta_lixeira", "pasta", current?.name, folderId);
 }
 
 export async function softDeleteFile(fileId: string): Promise<void> {
+  const { data: current } = await supabase.from("files").select("name").eq("id", fileId).single();
   const { error } = await supabase
     .from("files")
     .update({ deleted_at: new Date().toISOString() })
     .eq("id", fileId);
   if (error) throw error;
+  logEvent("mover_arquivo_lixeira", "arquivo", current?.name, fileId);
 }
 
 export async function restoreFolder(folderId: string): Promise<void> {
+  const { data: current } = await supabase.from("folders").select("name").eq("id", folderId).single();
   const { error } = await supabase.rpc("restore_folder", { p_folder_id: folderId });
   if (error) throw error;
+  logEvent("restaurar_pasta", "pasta", current?.name, folderId);
 }
 
 export async function restoreFile(fileId: string): Promise<void> {
+  const { data: current } = await supabase.from("files").select("name").eq("id", fileId).single();
   const { error } = await supabase.from("files").update({ deleted_at: null }).eq("id", fileId);
   if (error) throw error;
+  logEvent("restaurar_arquivo", "arquivo", current?.name, fileId);
 }
 
 function collectSelfAndDescendantIds(
@@ -81,9 +90,10 @@ const TRASH_LOCK_MESSAGE =
 export async function permanentlyDeleteFolder(folderId: string): Promise<void> {
   const { data: allFolders, error: foldersError } = await supabase
     .from("folders")
-    .select("id,parent_id");
+    .select("id,parent_id,name");
   if (foldersError) throw foldersError;
 
+  const targetName = allFolders.find((f) => f.id === folderId)?.name;
   const idsToPurge = Array.from(collectSelfAndDescendantIds(allFolders, folderId));
 
   const { data: filesToRemove, error: filesError } = await supabase
@@ -107,6 +117,8 @@ export async function permanentlyDeleteFolder(folderId: string): Promise<void> {
       .from(STORAGE_BUCKET)
       .remove(filesToRemove.map((f) => f.storage_path));
   }
+
+  logEvent("excluir_pasta_definitivo", "pasta", targetName, folderId);
 }
 
 export async function permanentlyDeleteFile(file: FileRow): Promise<void> {
@@ -121,6 +133,7 @@ export async function permanentlyDeleteFile(file: FileRow): Promise<void> {
   }
 
   await supabase.storage.from(STORAGE_BUCKET).remove([file.storage_path]);
+  logEvent("excluir_arquivo_definitivo", "arquivo", file.name, file.id);
 }
 
 export async function emptyTrash(): Promise<void> {

@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { logEvent } from "../eventLog/eventLogApi";
 import type { Favorite, FileRow, Folder } from "../../types/domain";
 
 type FavoriteRow = Favorite & { file: FileRow | null; folder: Folder | null };
@@ -48,6 +49,8 @@ export async function listFavoriteIds(
 export async function addFavoriteFile(userId: string, fileId: string): Promise<void> {
   const { error } = await supabase.from("favorites").insert({ user_id: userId, file_id: fileId });
   if (error) throw error;
+  const { data: file } = await supabase.from("files").select("name").eq("id", fileId).single();
+  logEvent("favoritar", "favorito", file?.name, fileId);
 }
 
 export async function removeFavoriteFile(userId: string, fileId: string): Promise<void> {
@@ -57,11 +60,15 @@ export async function removeFavoriteFile(userId: string, fileId: string): Promis
     .eq("user_id", userId)
     .eq("file_id", fileId);
   if (error) throw error;
+  const { data: file } = await supabase.from("files").select("name").eq("id", fileId).single();
+  logEvent("desfavoritar", "favorito", file?.name, fileId);
 }
 
 export async function addFavoriteFolder(userId: string, folderId: string): Promise<void> {
   const { error } = await supabase.from("favorites").insert({ user_id: userId, folder_id: folderId });
   if (error) throw error;
+  const { data: folder } = await supabase.from("folders").select("name").eq("id", folderId).single();
+  logEvent("favoritar", "favorito", folder?.name, folderId);
 }
 
 export async function removeFavoriteFolder(userId: string, folderId: string): Promise<void> {
@@ -71,4 +78,6 @@ export async function removeFavoriteFolder(userId: string, folderId: string): Pr
     .eq("user_id", userId)
     .eq("folder_id", folderId);
   if (error) throw error;
+  const { data: folder } = await supabase.from("folders").select("name").eq("id", folderId).single();
+  logEvent("desfavoritar", "favorito", folder?.name, folderId);
 }

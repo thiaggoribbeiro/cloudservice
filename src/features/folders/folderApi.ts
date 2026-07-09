@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { logEvent } from "../eventLog/eventLogApi";
 import type { Folder } from "../../types/domain";
 
 // `ownerId` only ever filters the root level (parentId === null). Deeper
@@ -41,20 +42,26 @@ export async function createFolder(
     .select()
     .single();
   if (error) throw error;
+  logEvent("criar_pasta", "pasta", data.name, data.id);
   return data;
 }
 
 export async function renameFolder(id: string, name: string): Promise<void> {
   const { error } = await supabase.from("folders").update({ name }).eq("id", id);
   if (error) throw error;
+  logEvent("renomear_pasta", "pasta", name, id);
 }
 
 export async function moveFolder(id: string, newParentId: string | null): Promise<void> {
+  const { data: current } = await supabase.from("folders").select("name").eq("id", id).single();
   const { error } = await supabase.from("folders").update({ parent_id: newParentId }).eq("id", id);
   if (error) throw error;
+  logEvent("mover_pasta", "pasta", current?.name, id);
 }
 
 export async function toggleFolderLock(id: string, locked: boolean): Promise<void> {
+  const { data: current } = await supabase.from("folders").select("name").eq("id", id).single();
   const { error } = await supabase.from("folders").update({ is_locked: locked }).eq("id", id);
   if (error) throw error;
+  logEvent(locked ? "travar_pasta" : "destravar_pasta", "pasta", current?.name, id);
 }

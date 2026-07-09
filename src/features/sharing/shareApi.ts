@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { logEvent } from "../eventLog/eventLogApi";
 import type { Folder, FolderShare, ShareLink } from "../../types/domain";
 
 export type FolderShareWithProfile = FolderShare & {
@@ -54,11 +55,20 @@ export async function shareFolderWithUsers(
     })),
   );
   if (error) throw error;
+  const { data: folder } = await supabase.from("folders").select("name").eq("id", folderId).single();
+  logEvent("compartilhar_pasta", "compartilhamento", folder?.name, folderId, { shared_with: userIds });
 }
 
 export async function revokeFolderShare(shareId: string): Promise<void> {
+  const { data: share } = await supabase
+    .from("folder_shares")
+    .select("folder_id, folder:folders(name)")
+    .eq("id", shareId)
+    .single();
   const { error } = await supabase.from("folder_shares").delete().eq("id", shareId);
   if (error) throw error;
+  const folderName = (share?.folder as { name: string } | null)?.name;
+  logEvent("remover_compartilhamento", "compartilhamento", folderName, share?.folder_id);
 }
 
 export type SharedFolderEntry = { share: FolderShare; folder: Folder };
@@ -102,6 +112,8 @@ export async function createShareLinkForFile(
     .select()
     .single();
   if (error) throw error;
+  const { data: file } = await supabase.from("files").select("name").eq("id", fileId).single();
+  logEvent("criar_link_publico", "compartilhamento", file?.name, fileId);
   return data;
 }
 
@@ -116,12 +128,22 @@ export async function createShareLinkForFolder(
     .select()
     .single();
   if (error) throw error;
+  const { data: folder } = await supabase.from("folders").select("name").eq("id", folderId).single();
+  logEvent("criar_link_publico", "compartilhamento", folder?.name, folderId);
   return data;
 }
 
 export async function revokeShareLink(id: string): Promise<void> {
+  const { data: link } = await supabase
+    .from("share_links")
+    .select("file_id, folder_id, file:files(name), folder:folders(name)")
+    .eq("id", id)
+    .single();
   const { error } = await supabase.from("share_links").delete().eq("id", id);
   if (error) throw error;
+  const name =
+    (link?.file as { name: string } | null)?.name ?? (link?.folder as { name: string } | null)?.name;
+  logEvent("revogar_link_publico", "compartilhamento", name, link?.file_id ?? link?.folder_id);
 }
 
 export function shareLinkUrl(token: string): string {

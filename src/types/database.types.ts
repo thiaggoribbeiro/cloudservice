@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      event_logs: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          target_id: string | null
+          target_name: string | null
+          target_type: string
+          user_email: string
+          user_id: string | null
+          user_role: Database["public"]["Enums"]["user_role"]
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          target_id?: string | null
+          target_name?: string | null
+          target_type: string
+          user_email: string
+          user_id?: string | null
+          user_role: Database["public"]["Enums"]["user_role"]
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          target_id?: string | null
+          target_name?: string | null
+          target_type?: string
+          user_email?: string
+          user_id?: string | null
+          user_role?: Database["public"]["Enums"]["user_role"]
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           created_at: string
@@ -344,6 +383,16 @@ export type Database = {
           quota_bytes: number
           used_bytes: number
         }[]
+      }
+      log_event: {
+        Args: {
+          p_action: string
+          p_metadata?: Json
+          p_target_id?: string
+          p_target_name?: string
+          p_target_type: string
+        }
+        Returns: undefined
       }
       list_public_folder_files: {
         Args: { p_token: string }
