@@ -5,9 +5,9 @@ import { MainArea } from "../../components/layout/MainArea";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { listSharedWithMe } from "./shareApi";
 import { formatRelativeTime } from "../../lib/format";
-import type { Folder } from "../../types/domain";
+import type { Folder, UserRole } from "../../types/domain";
 
-export function SharedWithMeView({ userId }: { userId: string }) {
+export function SharedWithMeView({ userId, userRole }: { userId: string; userRole: UserRole }) {
   const [selectedRoot, setSelectedRoot] = useState<Folder | null>(null);
   const [subPath, setSubPath] = useState<Folder[]>([]);
 
@@ -21,6 +21,7 @@ export function SharedWithMeView({ userId }: { userId: string }) {
       <MainArea
         path={[selectedRoot, ...subPath]}
         ownerId={userId}
+        userRole={userRole}
         rootLabel="Compartilhado comigo"
         onNavigate={(newPath) => {
           if (newPath.length === 0) {

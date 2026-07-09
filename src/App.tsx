@@ -91,14 +91,19 @@ function App() {
           <MainArea
             path={path}
             ownerId={session.user.id}
+            userRole={profile?.role ?? "user"}
             restrictRootToOwner
             onNavigate={handleNavigateFolder}
           />
         )}
 
-        {view.kind === "shared" && <SharedWithMeView userId={session.user.id} />}
+        {view.kind === "shared" && (
+          <SharedWithMeView userId={session.user.id} userRole={profile?.role ?? "user"} />
+        )}
 
-        {view.kind === "favorites" && <FavoritesView userId={session.user.id} />}
+        {view.kind === "favorites" && (
+          <FavoritesView userId={session.user.id} userRole={profile?.role ?? "user"} />
+        )}
 
         {view.kind === "trash" && <TrashView />}
 

@@ -1,5 +1,6 @@
 import { useStorageUsage } from "./useStorageUsage";
 import { formatBytes } from "../../lib/format";
+import { APP_VERSION } from "../../lib/constants";
 
 export function StorageUsageIndicator({ userId }: { userId: string | undefined }) {
   const { data } = useStorageUsage(userId);
@@ -18,6 +19,9 @@ export function StorageUsageIndicator({ userId }: { userId: string | undefined }
       </div>
       <p className="mono-tag mt-2 text-[11px] text-brand-black/55 dark:text-white/55">
         {formatBytes(data.used_bytes)} / {formatBytes(data.quota_bytes)}
+      </p>
+      <p className="mono-tag mt-1 text-[10px] uppercase tracking-widest text-brand-black/35 dark:text-white/35">
+        Versão {APP_VERSION}
       </p>
     </div>
   );

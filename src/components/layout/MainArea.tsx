@@ -4,17 +4,19 @@ import { FileGrid } from "../../features/files/FileGrid";
 import { UploadDropzone } from "../../features/files/UploadDropzone";
 import { useFolderContents } from "../../features/folders/useFolderContents";
 import { uploadFile } from "../../features/files/fileApi";
-import type { Folder } from "../../types/domain";
+import type { Folder, UserRole } from "../../types/domain";
 
 export function MainArea({
   path,
   ownerId,
+  userRole,
   restrictRootToOwner,
   rootLabel,
   onNavigate,
 }: {
   path: Folder[];
   ownerId: string;
+  userRole: UserRole;
   restrictRootToOwner?: boolean;
   rootLabel?: string;
   onNavigate: (path: Folder[]) => void;
@@ -48,6 +50,7 @@ export function MainArea({
               files={files}
               currentFolderId={currentFolderId}
               currentUserId={ownerId}
+              userRole={userRole}
               onOpenFolder={(folder) => onNavigate([...path, folder])}
             />
           )}

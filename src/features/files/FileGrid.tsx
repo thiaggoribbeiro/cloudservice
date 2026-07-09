@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Folder, FileRow } from "../../types/domain";
+import type { Folder, FileRow, UserRole } from "../../types/domain";
 import { formatBytes, isPreviewable, formatRelativeTime } from "../../lib/format";
 import { FileTypeIcon } from "../../components/ui/FileTypeIcon";
 import { downloadFile, renameFile, moveFile } from "./fileApi";
@@ -46,7 +46,7 @@ function ItemMenu({
   onDownload?: () => void;
   onToggleFavorite: () => void;
   isFavorited: boolean;
-  onDelete: () => void;
+  onDelete?: () => void;
   onOpen: boolean;
   onClose: () => void;
 }) {
@@ -109,17 +109,21 @@ function ItemMenu({
       >
         Mover
       </button>
-      <div className="my-1 border-t border-brand-border dark:border-white/10" />
-      <button
-        type="button"
-        onClick={() => {
-          onDelete();
-          onClose();
-        }}
-        className="block w-full px-3.5 py-2 text-left text-sm text-brand-primary transition-colors hover:bg-brand-pale/50 dark:hover:bg-white/10"
-      >
-        Mover para lixeira
-      </button>
+      {onDelete && (
+        <>
+          <div className="my-1 border-t border-brand-border dark:border-white/10" />
+          <button
+            type="button"
+            onClick={() => {
+              onDelete();
+              onClose();
+            }}
+            className="block w-full px-3.5 py-2 text-left text-sm text-brand-primary transition-colors hover:bg-brand-pale/50 dark:hover:bg-white/10"
+          >
+            Mover para lixeira
+          </button>
+        </>
+      )}
     </div>
   );
 }
@@ -129,17 +133,27 @@ export function FileGrid({
   files,
   currentFolderId,
   currentUserId,
+  userRole,
   onOpenFolder,
 }: {
   folders: Folder[];
   files: FileRow[];
   currentFolderId: string | null;
   currentUserId: string;
+  userRole: UserRole;
   onOpenFolder: (folder: Folder) => void;
 }) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [dialog, setDialog] = useState<ActiveDialog | null>(null);
   const queryClient = useQueryClient();
+
+  // Only admin/manager may delete items they don't own - a plain user or
+  // guest can delete only what they created/uploaded themselves, even
+  // inside a folder shared with them for editing (enforced again
+  // server-side by a trigger).
+  function canDelete(ownerId: string) {
+    return userRole === "admin" || userRole === "manager" || ownerId === currentUserId;
+  }
 
   useEffect(() => {
     if (!openMenuId) return;
@@ -247,7 +261,7 @@ export function FileGrid({
               onShare={() => setDialog({ kind: "share-folder", folder })}
               onToggleFavorite={() => favoriteFolderMutation.mutate(folder)}
               isFavorited={!!favoriteIds?.folderIds.has(folder.id)}
-              onDelete={() => deleteFolderMutation.mutate(folder.id)}
+              onDelete={canDelete(folder.owner_id) ? () => deleteFolderMutation.mutate(folder.id) : undefined}
             />
           </div>
         ))}
@@ -294,7 +308,7 @@ export function FileGrid({
               onDownload={() => downloadFile(file)}
               onToggleFavorite={() => favoriteFileMutation.mutate(file)}
               isFavorited={!!favoriteIds?.fileIds.has(file.id)}
-              onDelete={() => deleteFileMutation.mutate(file.id)}
+              onDelete={canDelete(file.owner_id) ? () => deleteFileMutation.mutate(file.id) : undefined}
             />
           </div>
         ))}

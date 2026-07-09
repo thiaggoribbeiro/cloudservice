@@ -9,9 +9,9 @@ import { StarIcon } from "../../components/ui/icons";
 import { listFavorites, removeFavoriteFile, removeFavoriteFolder } from "./favoritesApi";
 import { formatBytes, formatRelativeTime, isPreviewable } from "../../lib/format";
 import { FileTypeIcon } from "../../components/ui/FileTypeIcon";
-import type { Folder, FileRow } from "../../types/domain";
+import type { Folder, FileRow, UserRole } from "../../types/domain";
 
-export function FavoritesView({ userId }: { userId: string }) {
+export function FavoritesView({ userId, userRole }: { userId: string; userRole: UserRole }) {
   const [selectedRoot, setSelectedRoot] = useState<Folder | null>(null);
   const [subPath, setSubPath] = useState<Folder[]>([]);
   const [preview, setPreview] = useState<FileRow | null>(null);
@@ -36,6 +36,7 @@ export function FavoritesView({ userId }: { userId: string }) {
       <MainArea
         path={[selectedRoot, ...subPath]}
         ownerId={userId}
+        userRole={userRole}
         rootLabel="Favoritos"
         onNavigate={(newPath) => {
           if (newPath.length === 0) {

@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { MailIcon, LockIcon } from "../components/ui/icons";
+import { APP_VERSION } from "../lib/constants";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -43,7 +44,7 @@ export function LoginForm() {
             <img src="/logo-login.png" alt="AvestaCloud" className="h-44 w-auto" />
           </div>
 
-          <h1 className="text-center text-2xl leading-none text-brand-black/70">
+          <h1 className="text-center text-lg font-semibold leading-none text-brand-black/70">
             Entrar na nuvem
           </h1>
           <p className="mt-2 text-center text-sm text-brand-gray">
@@ -103,6 +104,9 @@ export function LoginForm() {
 
         <p className="mono-tag stagger-5 mt-5 text-center text-[11px] uppercase tracking-widest text-brand-gray">
           Acesso restrito · somente por convite
+        </p>
+        <p className="mono-tag stagger-5 mt-1 text-center text-[11px] uppercase tracking-widest text-brand-gray/60">
+          Versão {APP_VERSION}
         </p>
       </div>
     </div>

@@ -210,12 +210,23 @@
   }
 
   /* Single bordered container holding every row in a file/folder list - rows
-     inside it are separated by a hairline divider, not their own boxes. */
+     inside it are separated by a hairline divider, not their own boxes.
+     Rounding is applied to the first/last row rather than clipped via
+     overflow-hidden on the container, since that would also clip each
+     row's absolutely-positioned "..." dropdown menu. */
   .file-list {
-    @apply divide-y divide-brand-border overflow-hidden rounded-lg border border-brand-border bg-white;
+    @apply divide-y divide-brand-border rounded-lg border border-brand-border bg-white;
   }
   .dark .file-list {
     @apply divide-white/10 border-white/10 bg-dark-surface;
+  }
+  .file-list > .file-row:first-child {
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+  }
+  .file-list > .file-row:last-child {
+    border-bottom-left-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
   }
 
   /* A row inside .file-list (combine with "group" in markup for the hover-revealed menu button) */
