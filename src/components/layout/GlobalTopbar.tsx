@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../../lib/supabaseClient";
 import { ROLE_LABEL } from "../../lib/roleLabels";
 import { formatBytes, isPreviewable } from "../../lib/format";
+import { getInitials } from "../../lib/initials";
 import { FileTypeIcon } from "../../components/ui/FileTypeIcon";
 import { searchFilesAndFolders, buildFolderPath } from "../../features/search/searchApi";
 import { downloadFile } from "../../features/files/fileApi";
@@ -11,15 +12,6 @@ import { useTheme } from "../../lib/useTheme";
 import { SearchIcon, FolderIcon, SunIcon, MoonIcon } from "../ui/icons";
 import { logEvent } from "../../features/eventLog/eventLogApi";
 import type { FileRow, Folder, Profile } from "../../types/domain";
-
-function getInitials(name: string | null | undefined, email: string | undefined): string {
-  const trimmed = name?.trim();
-  if (trimmed) {
-    const parts = trimmed.split(/\s+/);
-    return parts.length > 1 ? `${parts[0][0]}${parts[1][0]}`.toUpperCase() : trimmed.slice(0, 2).toUpperCase();
-  }
-  return (email ?? "?").slice(0, 2).toUpperCase();
-}
 
 export function GlobalTopbar({
   userEmail,

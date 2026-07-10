@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Topbar } from "../../components/layout/Topbar";
 import { Modal } from "../../components/ui/Modal";
@@ -17,6 +17,7 @@ import {
 } from "./membersApi";
 import type { Profile, UserRole } from "../../types/domain";
 import { ROLE_LABEL } from "../../lib/roleLabels";
+import { getInitials } from "../../lib/initials";
 
 const ASSIGNABLE_ROLES: Exclude<UserRole, "admin">[] = ["user", "guest", "manager"];
 
@@ -24,6 +25,14 @@ const ASSIGNABLE_ROLES: Exclude<UserRole, "admin">[] = ["user", "guest", "manage
 // now, share a folder with them separately afterwards" - distinct from the
 // unselected placeholder, which still forces an explicit choice.
 const NO_FOLDER = "__none__";
+
+// Shared column template for the members table - the header and every row
+// apply this exact same string, so their tracks can never drift out of
+// alignment the way independently-sized flex columns did. fr units absorb
+// all leftover width instead of stranding it on the right; columns reveal
+// progressively at wider breakpoints, mirroring the file list's own pattern.
+const MEMBER_ROW_GRID =
+  "grid grid-cols-[1fr_2.5rem] items-center gap-3 sm:grid-cols-[1.6fr_1.4fr_2.5rem] lg:grid-cols-[1.6fr_1.4fr_0.7fr_2.5rem]";
 
 export function MembersView({
   currentUserId,
@@ -40,6 +49,7 @@ export function MembersView({
   const [passwordResult, setPasswordResult] = useState<CreateMemberResult | ResetPasswordResult | null>(
     null,
   );
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const { data: members = [], isLoading } = useQuery({
@@ -51,6 +61,17 @@ export function MembersView({
     mutationFn: deleteMember,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["members"] }),
   });
+
+  useEffect(() => {
+    if (!openMenuId) return;
+    function handlePointerDown(event: MouseEvent) {
+      const target = event.target as HTMLElement;
+      if (target.closest("[data-item-menu]") || target.closest("[data-item-menu-trigger]")) return;
+      setOpenMenuId(null);
+    }
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [openMenuId]);
 
   function handleCreated(res: CreateMemberResult) {
     setShowCreate(false);
@@ -82,47 +103,86 @@ export function MembersView({
         ) : members.length === 0 ? (
           <EmptyState title="Nenhum membro ainda" description="Crie o primeiro membro da equipe." />
         ) : (
-          <div className="flex flex-col gap-2">
-            {members.map((member) => {
-              const canManage = member.id !== currentUserId && member.role !== "admin";
-              return (
-                <div
-                  key={member.id}
-                  className="flex flex-col gap-3 rounded-lg border border-brand-border px-4 py-3 dark:border-white/10 dark:bg-white/[0.04] sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div className="flex min-w-0 flex-col">
-                    <span className="truncate text-sm font-medium text-brand-black dark:text-white">
-                      {member.display_name || member.email}
+          <>
+            <div className={`${MEMBER_ROW_GRID} px-4 pb-2`}>
+              <span className="eyebrow text-brand-gray">Usuario</span>
+              <span className="eyebrow hidden text-brand-gray sm:block">E-mail</span>
+              <span className="eyebrow hidden text-brand-gray lg:block">Nivel de acesso</span>
+              <span className="eyebrow text-center text-brand-gray">Acoes</span>
+            </div>
+
+            <div className="file-list">
+              {members.map((member) => {
+                const canManage = member.id !== currentUserId && member.role !== "admin";
+                const name = member.display_name || member.email;
+
+                return (
+                  <div key={member.id} className={`file-row cursor-default ${MEMBER_ROW_GRID}`}>
+                    <span className="flex min-w-0 items-center gap-3">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-primary text-xs font-bold text-white">
+                        {getInitials(member.display_name, member.email)}
+                      </span>
+                      <span className="truncate text-sm font-medium text-brand-black dark:text-white">
+                        {name}
+                      </span>
                     </span>
-                    <span className="mono-tag truncate text-[11px] text-brand-gray">{member.email}</span>
-                  </div>
-                  <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end sm:gap-3">
-                    <span className="eyebrow rounded-full border border-brand-border px-2.5 py-1 text-brand-primary dark:border-white/15">
-                      {ROLE_LABEL[member.role]}
+
+                    <span className="mono-tag hidden min-w-0 truncate text-[12px] text-brand-gray sm:block">
+                      {member.email}
                     </span>
-                    {canManage && (
-                      <>
+                    <span className="hidden min-w-0 lg:block">
+                      <span className="eyebrow inline-block rounded-full border border-brand-border px-2.5 py-1 text-brand-primary dark:border-white/15">
+                        {ROLE_LABEL[member.role]}
+                      </span>
+                    </span>
+
+                    {canManage ? (
+                      <div className="relative flex justify-center">
                         <button
                           type="button"
-                          onClick={() => setEditTarget(member)}
-                          className="text-sm font-medium text-brand-primary hover:underline"
+                          onClick={() => setOpenMenuId(openMenuId === member.id ? null : member.id)}
+                          data-item-menu-trigger
+                          className="rounded-md px-1.5 py-0.5 text-brand-gray transition-colors hover:bg-brand-pale/60 dark:hover:bg-white/10"
+                          aria-label="Mais opcoes"
                         >
-                          Editar
+                          ⋮
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => setDeleteTarget(member)}
-                          className="text-sm text-brand-gray hover:text-brand-black hover:underline dark:hover:text-white"
-                        >
-                          Excluir
-                        </button>
-                      </>
+                        {openMenuId === member.id && (
+                          <div
+                            data-item-menu
+                            className="stagger-0 absolute right-0 top-full z-10 mt-1 w-40 overflow-hidden rounded-lg border border-brand-border bg-white py-1 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.35)] dark:border-white/10 dark:bg-dark-surface"
+                          >
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditTarget(member);
+                                setOpenMenuId(null);
+                              }}
+                              className="block w-full px-3.5 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
+                            >
+                              Editar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setDeleteTarget(member);
+                                setOpenMenuId(null);
+                              }}
+                              className="block w-full px-3.5 py-2 text-left text-sm text-brand-primary transition-colors hover:bg-brand-pale/50 dark:hover:bg-white/10"
+                            >
+                              Excluir
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <span />
                     )}
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
 
