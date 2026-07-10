@@ -65,3 +65,11 @@ export async function toggleFolderLock(id: string, locked: boolean): Promise<voi
   if (error) throw error;
   logEvent(locked ? "travar_pasta" : "destravar_pasta", "pasta", current?.name, id);
 }
+
+// Recursive sum of every file under a folder (including subfolders),
+// computed on demand server-side rather than stored, so it can never drift.
+export async function getFolderSize(folderId: string): Promise<number> {
+  const { data, error } = await supabase.rpc("get_folder_size", { p_folder_id: folderId });
+  if (error) throw error;
+  return data ?? 0;
+}

@@ -5,7 +5,7 @@ import { MainArea } from "../../components/layout/MainArea";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { PreviewModal } from "../files/PreviewModal";
 import { downloadFile } from "../files/fileApi";
-import { StarIcon } from "../../components/ui/icons";
+import { StarIcon, FolderTileIcon } from "../../components/ui/icons";
 import { listFavorites, removeFavoriteFile, removeFavoriteFolder } from "./favoritesApi";
 import { formatBytes, formatRelativeTime, isPreviewable } from "../../lib/format";
 import { FileTypeIcon } from "../../components/ui/FileTypeIcon";
@@ -80,9 +80,9 @@ export function FavoritesView({ userId, userRole }: { userId: string; userRole: 
                   <div
                     key={entry.favoriteId}
                     className="file-row group"
-                    onDoubleClick={() => setSelectedRoot(entry.folder)}
+                    onClick={() => setSelectedRoot(entry.folder)}
                   >
-                    <span className="file-row-icon text-brand-primary">📁</span>
+                    <FolderTileIcon className="h-9 w-9 shrink-0" />
                     <span className="min-w-0 flex-1 truncate text-sm font-medium text-brand-black dark:text-white">
                       {entry.folder.name}
                     </span>

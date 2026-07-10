@@ -1,13 +1,23 @@
 import type { ReactNode } from "react";
 
+// Most dialogs (rename, move, confirm...) are a couple of form fields and
+// should stay compact; a file preview needs to fill the screen on a large
+// monitor instead of floating in a postage-stamp box, hence the size knob.
+const MAX_WIDTH_BY_SIZE = {
+  default: "max-w-lg",
+  large: "max-w-[min(96vw,88rem)]",
+};
+
 export function Modal({
   title,
   onClose,
   children,
+  size = "default",
 }: {
   title: string;
   onClose: () => void;
   children: ReactNode;
+  size?: "default" | "large";
 }) {
   return (
     <div
@@ -15,7 +25,7 @@ export function Modal({
       onClick={onClose}
     >
       <div
-        className="stagger-0 flex max-h-[calc(100vh-1.5rem)] w-full max-w-lg flex-col overflow-hidden rounded-xl border border-brand-border bg-white shadow-[0_24px_60px_-20px_rgba(0,0,0,0.35)] dark:border-white/10 dark:bg-dark-surface sm:max-h-[calc(100vh-3rem)]"
+        className={`stagger-0 flex max-h-[calc(100vh-1.5rem)] w-full ${MAX_WIDTH_BY_SIZE[size]} flex-col overflow-hidden rounded-xl border border-brand-border bg-white shadow-[0_24px_60px_-20px_rgba(0,0,0,0.35)] dark:border-white/10 dark:bg-dark-surface sm:max-h-[calc(100vh-3rem)]`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex shrink-0 items-start justify-between gap-4 border-b border-brand-border px-5 py-4 dark:border-white/10 sm:px-6">

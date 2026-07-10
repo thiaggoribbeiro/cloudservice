@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { StorageUsageIndicator } from "../../features/storageUsage/StorageUsageIndicator";
 import { CreateFolderDialog } from "../../features/folders/CreateFolderDialog";
-import { ShareDialog } from "../../features/sharing/ShareDialog";
 import { uploadFile, uploadFolderFiles } from "../../features/files/fileApi";
 import {
   PlusIcon,
@@ -90,8 +89,6 @@ export function Sidebar({
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [showCreateFolder, setShowCreateFolder] = useState(false);
-  const [showCreateSharedFolder, setShowCreateSharedFolder] = useState(false);
-  const [shareTarget, setShareTarget] = useState<Folder | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
@@ -186,19 +183,6 @@ export function Sidebar({
                 <FolderIcon className="h-[18px] w-[18px] text-brand-gray" />
                 Criar pasta
               </button>
-              {!isGuest && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowCreateSharedFolder(true);
-                    setMenuOpen(false);
-                  }}
-                  className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
-                >
-                  <UsersIcon className="h-[18px] w-[18px] text-brand-gray" />
-                  Criar pasta compartilhada
-                </button>
-              )}
             </div>
           )}
 
@@ -299,28 +283,6 @@ export function Sidebar({
         />
       )}
 
-      {showCreateSharedFolder && (
-        <CreateFolderDialog
-          title="Nova pasta compartilhada"
-          parentId={uploadTargetFolderId}
-          ownerId={userId}
-          invalidateKeys={createFolderInvalidateKeys}
-          allowLock={actionTarget?.allowLock}
-          onCreated={(folder) => {
-            setShowCreateSharedFolder(false);
-            setShareTarget(folder);
-          }}
-          onClose={() => setShowCreateSharedFolder(false)}
-        />
-      )}
-
-      {shareTarget && (
-        <ShareDialog
-          target={{ kind: "folder", folder: shareTarget }}
-          currentUserId={userId}
-          onClose={() => setShareTarget(null)}
-        />
-      )}
     </aside>
   );
 }

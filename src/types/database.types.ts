@@ -106,6 +106,7 @@ export type Database = {
           size_bytes: number
           storage_path: string
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           created_at?: string
@@ -120,6 +121,7 @@ export type Database = {
           size_bytes?: number
           storage_path: string
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           created_at?: string
@@ -134,6 +136,7 @@ export type Database = {
           size_bytes?: number
           storage_path?: string
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
@@ -148,6 +151,13 @@ export type Database = {
             columns: ["repository_id"]
             isOneToOne: false
             referencedRelation: "repositories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "files_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -198,6 +208,7 @@ export type Database = {
           parent_id: string | null
           repository_id: string | null
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           created_at?: string
@@ -209,6 +220,7 @@ export type Database = {
           parent_id?: string | null
           repository_id?: string | null
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           created_at?: string
@@ -220,6 +232,7 @@ export type Database = {
           parent_id?: string | null
           repository_id?: string | null
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
@@ -234,6 +247,13 @@ export type Database = {
             columns: ["repository_id"]
             isOneToOne: false
             referencedRelation: "repositories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folders_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -294,6 +314,13 @@ export type Database = {
           root_folder_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "repositories_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "repositories_root_folder_id_fkey"
             columns: ["root_folder_id"]
@@ -370,6 +397,7 @@ export type Database = {
           root_folder_id: string
         }[]
       }
+      get_folder_size: { Args: { p_folder_id: string }; Returns: number }
       get_repository_usage: {
         Args: { p_repository_id: string }
         Returns: {
@@ -384,16 +412,6 @@ export type Database = {
           used_bytes: number
         }[]
       }
-      log_event: {
-        Args: {
-          p_action: string
-          p_metadata?: Json
-          p_target_id?: string
-          p_target_name?: string
-          p_target_type: string
-        }
-        Returns: undefined
-      }
       list_public_folder_files: {
         Args: { p_token: string }
         Returns: {
@@ -403,6 +421,16 @@ export type Database = {
           size_bytes: number
           storage_path: string
         }[]
+      }
+      log_event: {
+        Args: {
+          p_action: string
+          p_metadata?: Json
+          p_target_id?: string
+          p_target_name?: string
+          p_target_type: string
+        }
+        Returns: undefined
       }
       object_has_valid_public_link: {
         Args: { p_object_name: string }

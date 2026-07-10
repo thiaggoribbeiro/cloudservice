@@ -9,13 +9,12 @@ export type RepositoryWithActiveRoot = Repository & { root_folder: Folder };
 export async function listRepositories(): Promise<RepositoryWithRoot[]> {
   const { data, error } = await supabase
     .from("repositories")
-    .select("*, root_folder:folders!repositories_root_folder_id_fkey(*)")
+    .select("*, root_folder:folders!repositories_root_folder_id_fkey!inner(*)")
+    .is("root_folder.deleted_at", null)
     .order("created_at", { ascending: false });
   if (error) throw error;
 
-  return (data as unknown as RepositoryWithRoot[]).filter(
-    (repository) => repository.root_folder !== null && repository.root_folder.deleted_at === null,
-  );
+  return data as unknown as RepositoryWithRoot[];
 }
 
 export async function createRepository(

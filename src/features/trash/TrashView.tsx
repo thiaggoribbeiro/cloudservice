@@ -5,6 +5,7 @@ import { EmptyState } from "../../components/ui/EmptyState";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { formatBytes } from "../../lib/format";
 import { FileTypeIcon } from "../../components/ui/FileTypeIcon";
+import { FolderTileIcon } from "../../components/ui/icons";
 import {
   listTrashedFolders,
   listTrashedFiles,
@@ -109,7 +110,7 @@ export function TrashView() {
                 className="file-row flex items-center justify-between"
               >
                 <span className="flex items-center gap-2.5 truncate text-sm font-medium">
-                  <span className="file-row-icon text-brand-primary">📁</span>
+                  <FolderTileIcon className="h-9 w-9 shrink-0" />
                   {folder.name}
                 </span>
                 <div className="flex shrink-0 items-center gap-4">

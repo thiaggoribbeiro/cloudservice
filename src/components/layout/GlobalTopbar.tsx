@@ -25,10 +25,12 @@ export function GlobalTopbar({
   userEmail,
   profile,
   onNavigateFolder,
+  onGoHome,
 }: {
   userEmail: string | undefined;
   profile: Profile | null;
   onNavigateFolder: (path: Folder[]) => void;
+  onGoHome: () => void;
 }) {
   const { theme, toggleTheme } = useTheme();
   const [query, setQuery] = useState("");
@@ -79,11 +81,19 @@ export function GlobalTopbar({
 
   return (
     <header className="flex min-h-14 shrink-0 flex-wrap items-center gap-3 bg-white px-3 py-2 dark:bg-dark-surface sm:flex-nowrap sm:gap-4 sm:px-4 lg:gap-6 lg:px-6">
-      <img
-        src={theme === "dark" ? "/logo-dark.png" : "/logo-claro.png"}
-        alt="AvestaCloud"
-        className="h-10 w-auto shrink-0 sm:h-12"
-      />
+      <button
+        type="button"
+        onClick={onGoHome}
+        className="shrink-0 rounded-md transition-opacity hover:opacity-80"
+        aria-label="Ir para a pagina inicial"
+        title="Pagina inicial"
+      >
+        <img
+          src={theme === "dark" ? "/logo-dark.png" : "/logo-claro.png"}
+          alt="AvestaCloud"
+          className="h-10 w-auto sm:h-12"
+        />
+      </button>
 
       <div ref={searchRef} className="relative order-3 flex w-full justify-center sm:order-none sm:w-auto sm:flex-1">
         <div className="w-full max-w-md">

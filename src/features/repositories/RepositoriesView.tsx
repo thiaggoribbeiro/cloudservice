@@ -346,11 +346,7 @@ export function RepositoriesView({
       )}
 
       {inviteTarget && (
-        <ShareDialog
-          target={{ kind: "folder", folder: inviteTarget }}
-          currentUserId={userId}
-          onClose={() => setInviteTarget(null)}
-        />
+        <ShareDialog folder={inviteTarget} currentUserId={userId} onClose={() => setInviteTarget(null)} />
       )}
 
       {repositoryDialog?.kind === "rename" && (

@@ -1,8 +1,9 @@
+import JSZip from "jszip";
 import { supabase } from "../../lib/supabaseClient";
 import { STORAGE_BUCKET } from "../../lib/constants";
 import { listFolders, createFolder } from "../folders/folderApi";
 import { logEvent } from "../eventLog/eventLogApi";
-import type { FileRow } from "../../types/domain";
+import type { FileRow, Folder } from "../../types/domain";
 
 export async function listFiles(folderId: string | null): Promise<FileRow[]> {
   let query = supabase.from("files").select("*").is("deleted_at", null).order("name");
@@ -98,6 +99,46 @@ export async function downloadFile(file: FileRow): Promise<void> {
   const anchor = document.createElement("a");
   anchor.href = url;
   anchor.download = file.name;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
+
+// Walks a folder's subtree (via the same RLS-scoped listFolders/listFiles
+// calls the rest of the app uses) collecting every file with its path
+// relative to the folder being downloaded, so the zip mirrors the folder
+// structure instead of dumping everything flat.
+async function collectFilesRecursive(
+  folderId: string,
+  relPath: string,
+): Promise<{ file: FileRow; relPath: string }[]> {
+  const [subfolders, files] = await Promise.all([listFolders(folderId), listFiles(folderId)]);
+  const own = files.map((file) => ({ file, relPath: `${relPath}${file.name}` }));
+  const nested = await Promise.all(
+    subfolders.map((sub) => collectFilesRecursive(sub.id, `${relPath}${sub.name}/`)),
+  );
+  return [...own, ...nested.flat()];
+}
+
+export async function downloadFolder(folder: Folder): Promise<void> {
+  const entries = await collectFilesRecursive(folder.id, "");
+  if (entries.length === 0) throw new Error("Pasta vazia - nada para baixar.");
+
+  const zip = new JSZip();
+  for (const { file, relPath } of entries) {
+    const { data, error } = await supabase.storage.from(STORAGE_BUCKET).download(file.storage_path);
+    if (error) throw error;
+    zip.file(relPath, data);
+  }
+
+  const blob = await zip.generateAsync({ type: "blob" });
+  logEvent("download_pasta", "pasta", folder.name, folder.id);
+
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `${folder.name}.zip`;
   document.body.appendChild(anchor);
   anchor.click();
   anchor.remove();

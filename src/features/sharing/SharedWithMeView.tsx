@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Topbar } from "../../components/layout/Topbar";
 import { MainArea } from "../../components/layout/MainArea";
 import { EmptyState } from "../../components/ui/EmptyState";
+import { FolderTileIcon } from "../../components/ui/icons";
 import { listSharedWithMe } from "./shareApi";
 import { formatRelativeTime } from "../../lib/format";
 import type { CreateActionTarget, Folder, UserRole } from "../../types/domain";
@@ -81,14 +82,14 @@ export function SharedWithMeView({
               {entries.map(({ folder }) => (
                 <div
                   key={folder.id}
-                  onDoubleClick={() => {
+                  onClick={() => {
                     setSelectedRoot(folder);
                     setSubPath([]);
                     publishActionTarget(folder);
                   }}
                   className="file-row"
                 >
-                  <span className="file-row-icon text-brand-primary">📁</span>
+                  <FolderTileIcon className="h-9 w-9 shrink-0" />
                   <span className="min-w-0 flex-1 truncate text-sm font-medium text-brand-black dark:text-white">
                     {folder.name}
                   </span>

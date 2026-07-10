@@ -148,6 +148,25 @@ export function LockIcon(props: IconProps) {
   );
 }
 
+export function UnlockIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M6.5 11V8.2a5.5 5.5 0 0 1 10.3-2.7" />
+      <path d="M5.8 11h12.4a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H5.8a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1Z" />
+    </svg>
+  );
+}
+
+export function DownloadIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 4v11.3" />
+      <path d="m8.2 11.7 3.8 3.8 3.8-3.8" />
+      <path d="M5 17v2.5A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V17" />
+    </svg>
+  );
+}
+
 export function EyeIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
@@ -185,6 +204,24 @@ export function EventLogIcon(props: IconProps) {
     <svg {...base} {...props}>
       <path d="M8.5 4.5h7A1.5 1.5 0 0 1 17 6v13.5a1 1 0 0 1-1.5.9L12 18.5l-3.5 1.9a1 1 0 0 1-1.5-.9V6a1.5 1.5 0 0 1 1.5-1.5Z" />
       <path d="M10 8.5h4M10 11.5h4M10 14.5h2.5" />
+    </svg>
+  );
+}
+
+// The classic solid manila folder used for rows in a file/folder list - a
+// recognizable, fixed-yellow glyph (not an outline in `currentColor` like
+// FolderIcon above, which is tuned for small monochrome nav/menu contexts).
+export function FolderTileIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 40 40" aria-hidden="true" {...props}>
+      <path
+        d="M5 9.5A1.5 1.5 0 0 1 6.5 8h8.6a1.8 1.8 0 0 1 1.3.55L18.8 11H33.5A1.5 1.5 0 0 1 35 12.5v17A1.5 1.5 0 0 1 33.5 31h-27A1.5 1.5 0 0 1 5 29.5Z"
+        fill="#FBBF24"
+      />
+      <path
+        d="M5 14.5A1.5 1.5 0 0 1 6.5 13h27A1.5 1.5 0 0 1 35 14.5v15A1.5 1.5 0 0 1 33.5 31h-27A1.5 1.5 0 0 1 5 29.5Z"
+        fill="#F59E0B"
+      />
     </svg>
   );
 }

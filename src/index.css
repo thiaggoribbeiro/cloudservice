@@ -250,13 +250,6 @@
     @apply bg-white/[0.06];
   }
 
-  .file-row-icon {
-    @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-pale/60 text-lg;
-  }
-  .dark .file-row-icon {
-    @apply bg-white/10;
-  }
-
   /* Die-cut manifest tab: the recurring signature shape (a hanging folder tab) */
   .manifest-tab {
     clip-path: polygon(0 0, 100% 0, 100% 100%, 12% 100%, 0 70%);
