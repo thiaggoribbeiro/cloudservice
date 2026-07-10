@@ -5,7 +5,8 @@ import { ROLE_LABEL } from "../../lib/roleLabels";
 import { formatBytes, isPreviewable } from "../../lib/format";
 import { getInitials } from "../../lib/initials";
 import { FileTypeIcon } from "../../components/ui/FileTypeIcon";
-import { searchFilesAndFolders, buildFolderPath } from "../../features/search/searchApi";
+import { searchFilesAndFolders } from "../../features/search/searchApi";
+import { getFolderPath } from "../../features/folders/folderApi";
 import { downloadFile } from "../../features/files/fileApi";
 import { PreviewModal } from "../../features/files/PreviewModal";
 import { useTheme } from "../../lib/useTheme";
@@ -55,7 +56,7 @@ export function GlobalTopbar({
   });
 
   async function handleFolderResult(folder: Folder) {
-    const path = await buildFolderPath(folder.id);
+    const path = await getFolderPath(folder.id);
     onNavigateFolder(path);
     setSearchOpen(false);
     setQuery("");

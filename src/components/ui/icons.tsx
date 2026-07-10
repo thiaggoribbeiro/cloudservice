@@ -208,6 +208,15 @@ export function EventLogIcon(props: IconProps) {
   );
 }
 
+export function LocateIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 21S5 14.5 5 9.5a7 7 0 0 1 14 0C19 14.5 12 21 12 21Z" />
+      <circle cx="12" cy="9.3" r="2.4" />
+    </svg>
+  );
+}
+
 // The classic solid manila folder used for rows in a file/folder list - a
 // recognizable, fixed-yellow glyph (not an outline in `currentColor` like
 // FolderIcon above, which is tuned for small monochrome nav/menu contexts).

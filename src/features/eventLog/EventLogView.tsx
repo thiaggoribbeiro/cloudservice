@@ -6,7 +6,9 @@ import { EVENT_LOG_PAGE_SIZE, listEventLogs } from "./eventLogApi";
 import { EVENT_ACTION_LABEL, EVENT_CATEGORY_LABEL, type EventTargetType } from "../../lib/eventLogLabels";
 import { ROLE_LABEL } from "../../lib/roleLabels";
 import { formatRelativeTime } from "../../lib/format";
-import type { EventLog } from "../../types/domain";
+import { getFolderPath } from "../folders/folderApi";
+import { LocateIcon } from "../../components/ui/icons";
+import type { EventLog, Folder } from "../../types/domain";
 
 const CATEGORY_FILTERS: (EventTargetType | "all")[] = [
   "all",
@@ -19,7 +21,60 @@ const CATEGORY_FILTERS: (EventTargetType | "all")[] = [
   "repositorio",
 ];
 
-export function EventLogView() {
+// Metadata shape stamped on "upload_arquivo" events at upload time - see
+// uploadFile in fileApi.ts. Older rows logged before this existed simply
+// won't have it, which the render side treats as "no location to show".
+type UploadMetadata = { folder_id: string | null; folder_path: string };
+
+function isUploadMetadata(metadata: unknown): metadata is UploadMetadata {
+  return !!metadata && typeof metadata === "object" && "folder_path" in metadata;
+}
+
+function UploadLocation({
+  metadata,
+  onNavigateFolder,
+}: {
+  metadata: UploadMetadata;
+  onNavigateFolder: (path: Folder[]) => void;
+}) {
+  const [state, setState] = useState<"idle" | "locating" | "not-found">("idle");
+
+  async function handleLocate() {
+    if (metadata.folder_id === null) {
+      onNavigateFolder([]);
+      return;
+    }
+    setState("locating");
+    const path = await getFolderPath(metadata.folder_id);
+    if (path.length === 0) {
+      setState("not-found");
+      return;
+    }
+    setState("idle");
+    onNavigateFolder(path);
+  }
+
+  return (
+    <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+      <span className="truncate text-xs text-brand-gray">{metadata.folder_path}</span>
+      {state === "not-found" ? (
+        <span className="text-xs text-brand-gray">Pasta nao encontrada - pode ter sido excluida</span>
+      ) : (
+        <button
+          type="button"
+          onClick={handleLocate}
+          disabled={state === "locating"}
+          className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-brand-primary transition-colors hover:underline disabled:opacity-60"
+        >
+          <LocateIcon className="h-3.5 w-3.5" />
+          {state === "locating" ? "Abrindo…" : "Ver local do arquivo"}
+        </button>
+      )}
+    </span>
+  );
+}
+
+export function EventLogView({ onNavigateFolder }: { onNavigateFolder: (path: Folder[]) => void }) {
   const [category, setCategory] = useState<EventTargetType | "all">("all");
   const [search, setSearch] = useState("");
   const [rows, setRows] = useState<EventLog[]>([]);
@@ -104,9 +159,14 @@ export function EventLogView() {
                     </span>
                     <span className="eyebrow text-[11px] text-brand-primary">{ROLE_LABEL[row.user_role]}</span>
                   </div>
-                  <span className="min-w-0 flex-1 truncate text-sm text-brand-black dark:text-white">
-                    {EVENT_ACTION_LABEL[row.action] ?? row.action}
-                    {row.target_name && <span className="text-brand-gray"> "{row.target_name}"</span>}
+                  <span className="flex min-w-0 flex-1 flex-col justify-center">
+                    <span className="truncate text-sm text-brand-black dark:text-white">
+                      {EVENT_ACTION_LABEL[row.action] ?? row.action}
+                      {row.target_name && <span className="text-brand-gray"> "{row.target_name}"</span>}
+                    </span>
+                    {row.action === "upload_arquivo" && isUploadMetadata(row.metadata) && (
+                      <UploadLocation metadata={row.metadata} onNavigateFolder={onNavigateFolder} />
+                    )}
                   </span>
                   <span className="mono-tag hidden w-40 shrink-0 text-right text-[12px] text-brand-gray sm:block">
                     {formatRelativeTime(row.created_at)}

@@ -30,6 +30,23 @@ export async function listAllFoldersFlat(): Promise<Folder[]> {
   return data;
 }
 
+// Walks the parent_id chain of a folder (using the already-fetched flat list
+// of every folder the caller can see) to reconstruct the breadcrumb path
+// needed to open it directly - from a search result, or from an event log
+// entry pointing at where a file was uploaded.
+export async function getFolderPath(folderId: string): Promise<Folder[]> {
+  const allFolders = await listAllFoldersFlat();
+  const byId = new Map(allFolders.map((f) => [f.id, f]));
+
+  const path: Folder[] = [];
+  let current = byId.get(folderId);
+  while (current) {
+    path.unshift(current);
+    current = current.parent_id ? byId.get(current.parent_id) : undefined;
+  }
+  return path;
+}
+
 export async function createFolder(
   name: string,
   parentId: string | null,

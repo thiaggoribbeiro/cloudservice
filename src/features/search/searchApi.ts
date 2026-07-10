@@ -1,5 +1,4 @@
 import { supabase } from "../../lib/supabaseClient";
-import { listAllFoldersFlat } from "../folders/folderApi";
 import type { FileRow, Folder } from "../../types/domain";
 
 export type SearchResults = {
@@ -37,20 +36,4 @@ export async function searchFilesAndFolders(query: string): Promise<SearchResult
   if (filesRes.error) throw filesRes.error;
 
   return { folders: foldersRes.data, files: filesRes.data };
-}
-
-// Walks the parent_id chain of a folder (using the already-fetched flat list
-// of every folder the caller can see) to reconstruct the breadcrumb path
-// needed to open it directly from a search result.
-export async function buildFolderPath(folderId: string): Promise<Folder[]> {
-  const allFolders = await listAllFoldersFlat();
-  const byId = new Map(allFolders.map((f) => [f.id, f]));
-
-  const path: Folder[] = [];
-  let current = byId.get(folderId);
-  while (current) {
-    path.unshift(current);
-    current = current.parent_id ? byId.get(current.parent_id) : undefined;
-  }
-  return path;
 }

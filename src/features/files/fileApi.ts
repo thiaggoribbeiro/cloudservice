@@ -1,7 +1,7 @@
 import JSZip from "jszip";
 import { supabase } from "../../lib/supabaseClient";
 import { STORAGE_BUCKET } from "../../lib/constants";
-import { listFolders, createFolder } from "../folders/folderApi";
+import { listFolders, createFolder, getFolderPath } from "../folders/folderApi";
 import { logEvent } from "../eventLog/eventLogApi";
 import type { FileRow, Folder } from "../../types/domain";
 
@@ -47,7 +47,16 @@ export async function uploadFile(
     throw error;
   }
 
-  logEvent("upload_arquivo", "arquivo", data.name, data.id);
+  // Snapshot the folder breadcrumb at upload time (not re-derived later) so
+  // the audit trail keeps saying where a file landed even if that folder
+  // gets renamed or moved afterward - only navigating back to it needs the
+  // current, live path.
+  const folderPath = folderId ? await getFolderPath(folderId) : [];
+  const folderPathLabel = folderPath.length ? folderPath.map((f) => f.name).join(" / ") : "Meus arquivos";
+  logEvent("upload_arquivo", "arquivo", data.name, data.id, {
+    folder_id: folderId,
+    folder_path: folderPathLabel,
+  });
   return data;
 }
 

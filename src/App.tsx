@@ -164,7 +164,7 @@ function App() {
         )}
 
         {view.kind === "eventLog" && (profile?.role === "admin" || profile?.role === "manager") && (
-          <EventLogView />
+          <EventLogView onNavigateFolder={handleNavigateFolder} />
         )}
       </div>
     </div>
