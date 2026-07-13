@@ -45,7 +45,7 @@ export function LoginForm() {
       <div className="relative w-full max-w-md">
         <div className="stagger-1 relative rounded-2xl border border-brand-border bg-white p-10 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.25)]">
           <div className="stagger-0 flex justify-center pb-8">
-            <img src="/logo-login.png" alt="AvestaCloud" className="h-44 w-auto" />
+            <img src="/logo-login.png" alt="Cloud Service - Avesta" className="h-44 w-auto" />
           </div>
 
           <h1 className="text-center text-lg font-semibold leading-none text-brand-black/70">

@@ -83,7 +83,7 @@ export function GlobalTopbar({
       >
         <img
           src={theme === "dark" ? "/logo-dark.png" : "/logo-claro.png"}
-          alt="AvestaCloud"
+          alt="Cloud Service - Avesta"
           className="h-10 w-auto sm:h-12"
         />
       </button>
