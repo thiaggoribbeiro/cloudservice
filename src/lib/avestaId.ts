@@ -13,6 +13,29 @@ const AVESTAID_SUPABASE_URL = import.meta.env.VITE_AVESTAID_SUPABASE_URL as stri
 const AVESTAID_SUPABASE_ANON_KEY = import.meta.env.VITE_AVESTAID_SUPABASE_ANON_KEY as string
 const APP_SLUG = 'cloudservice'
 
+// PKCE (RFC 7636): binds the one-time login code to this browser. The
+// verifier never leaves this tab (sessionStorage + a POST body) — only its
+// SHA-256 hash travels in the portal redirect URL — so a code intercepted
+// via logs/Referer/XSS can't be redeemed by anyone else.
+const PKCE_VERIFIER_KEY = 'avestaid_pkce_verifier'
+
+function base64UrlEncode(bytes: Uint8Array): string {
+  let binary = ''
+  for (const byte of bytes) binary += String.fromCharCode(byte)
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+function generateCodeVerifier(): string {
+  const bytes = new Uint8Array(32)
+  crypto.getRandomValues(bytes)
+  return base64UrlEncode(bytes)
+}
+
+async function sha256Base64Url(input: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input))
+  return base64UrlEncode(new Uint8Array(digest))
+}
+
 export interface AvestaUser {
   id: string
   email: string
@@ -52,18 +75,24 @@ function isValid(session: AvestaSession | null): session is AvestaSession {
   return !!session && session.expiresAt - EXPIRY_BUFFER_MS > Date.now()
 }
 
-function redirectToLogin(returnTo: string) {
+async function redirectToLogin(returnTo: string) {
+  const codeVerifier = generateCodeVerifier()
+  sessionStorage.setItem(PKCE_VERIFIER_KEY, codeVerifier)
+  const codeChallenge = await sha256Base64Url(codeVerifier)
+
   const url = new URL('/login', AVESTAID_PORTAL_URL)
   url.searchParams.set('app', APP_SLUG)
   url.searchParams.set('return_to', returnTo)
+  url.searchParams.set('code_challenge', codeChallenge)
+  url.searchParams.set('code_challenge_method', 'S256')
   window.location.href = url.toString()
 }
 
-export function ensureSession(): Promise<AvestaSession | null> {
+export async function ensureSession(): Promise<AvestaSession | null> {
   const session = readSession()
-  if (isValid(session)) return Promise.resolve(session)
+  if (isValid(session)) return session
 
-  redirectToLogin(window.location.href)
+  await redirectToLogin(window.location.href)
   return new Promise(() => {}) // navigating away; nothing left to resolve
 }
 
@@ -96,13 +125,17 @@ export async function handleCallback(): Promise<{ returnTo: string }> {
   const returnTo = params.get('return_to') ?? '/'
   if (!code) throw new Error('Callback sem código de login.')
 
+  const codeVerifier = sessionStorage.getItem(PKCE_VERIFIER_KEY)
+  sessionStorage.removeItem(PKCE_VERIFIER_KEY)
+  if (!codeVerifier) throw new Error('Verificador PKCE ausente — refaça o login.')
+
   const response = await fetch(`${AVESTAID_SUPABASE_URL}/functions/v1/exchange-code`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${AVESTAID_SUPABASE_ANON_KEY}`,
     },
-    body: JSON.stringify({ code }),
+    body: JSON.stringify({ code, code_verifier: codeVerifier }),
   })
 
   if (!response.ok) {
