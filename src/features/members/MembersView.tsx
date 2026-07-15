@@ -19,6 +19,9 @@ import type { Profile, UserRole } from "../../types/domain";
 import { ROLE_LABEL } from "../../lib/roleLabels";
 import { getInitials } from "../../lib/initials";
 
+const AVESTAID_ENABLED = import.meta.env.VITE_AVESTAID_ENABLED === "true";
+const AVESTAID_PORTAL_URL = import.meta.env.VITE_AVESTAID_PORTAL_URL as string;
+
 const ASSIGNABLE_ROLES: Exclude<UserRole, "admin">[] = ["user", "guest", "manager"];
 
 // Sentinel folder-select value meaning "create the guest without folder access
@@ -92,7 +95,19 @@ export function MembersView({
         <p className="mono-tag text-xs text-brand-gray">
           {members.length} {members.length === 1 ? "membro cadastrado" : "membros cadastrados"}
         </p>
-        <button type="button" onClick={() => setShowCreate(true)} className="btn-primary w-full text-sm sm:w-auto">
+        <button
+          type="button"
+          onClick={() => {
+            // Under AvestaID, credential issuance and access grants live in
+            // the central console — this app no longer creates members itself.
+            if (AVESTAID_ENABLED) {
+              window.open(`${AVESTAID_PORTAL_URL}/admin/membros?app=cloudservice`, "_blank");
+              return;
+            }
+            setShowCreate(true);
+          }}
+          className="btn-primary w-full text-sm sm:w-auto"
+        >
           + Novo membro
         </button>
       </div>

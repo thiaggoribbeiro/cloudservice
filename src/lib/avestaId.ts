@@ -1,0 +1,127 @@
+// Client-side session handling for AvestaID SSO. This app is a static SPA
+// with no server and no router, so the whole login handoff happens via
+// browser redirects, a `?code=` query param, and localStorage.
+//
+// Ported from the sister apps' copy — near-identical on purpose so all
+// apps stay easy to diff/update together.
+
+const STORAGE_KEY = 'avestaid_session'
+const EXPIRY_BUFFER_MS = 60_000 // treat a token as expired 60s before it actually is
+
+const AVESTAID_PORTAL_URL = import.meta.env.VITE_AVESTAID_PORTAL_URL as string
+const AVESTAID_SUPABASE_URL = import.meta.env.VITE_AVESTAID_SUPABASE_URL as string
+const AVESTAID_SUPABASE_ANON_KEY = import.meta.env.VITE_AVESTAID_SUPABASE_ANON_KEY as string
+const APP_SLUG = 'cloudservice'
+
+export interface AvestaUser {
+  id: string
+  email: string
+  fullName: string | null
+}
+
+export interface AvestaSession {
+  accessToken: string
+  expiresAt: number
+  appRole: string
+  user: AvestaUser
+}
+
+type Listener = (session: AvestaSession | null) => void
+const listeners = new Set<Listener>()
+
+function readSession(): AvestaSession | null {
+  const raw = localStorage.getItem(STORAGE_KEY)
+  if (!raw) return null
+  try {
+    return JSON.parse(raw) as AvestaSession
+  } catch {
+    return null
+  }
+}
+
+function writeSession(session: AvestaSession | null) {
+  if (session) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(session))
+  } else {
+    localStorage.removeItem(STORAGE_KEY)
+  }
+  listeners.forEach((cb) => cb(session))
+}
+
+function isValid(session: AvestaSession | null): session is AvestaSession {
+  return !!session && session.expiresAt - EXPIRY_BUFFER_MS > Date.now()
+}
+
+function redirectToLogin(returnTo: string) {
+  const url = new URL('/login', AVESTAID_PORTAL_URL)
+  url.searchParams.set('app', APP_SLUG)
+  url.searchParams.set('return_to', returnTo)
+  window.location.href = url.toString()
+}
+
+export function ensureSession(): Promise<AvestaSession | null> {
+  const session = readSession()
+  if (isValid(session)) return Promise.resolve(session)
+
+  redirectToLogin(window.location.href)
+  return new Promise(() => {}) // navigating away; nothing left to resolve
+}
+
+export async function getAccessToken(): Promise<string | null> {
+  const session = readSession()
+  return isValid(session) ? session.accessToken : null
+}
+
+export function getUser(): AvestaUser | null {
+  const session = readSession()
+  return isValid(session) ? session.user : null
+}
+
+export function onSessionChange(cb: Listener): () => void {
+  listeners.add(cb)
+  return () => listeners.delete(cb)
+}
+
+export async function signOut(): Promise<void> {
+  writeSession(null)
+}
+
+export function hasCallbackCode(): boolean {
+  return new URLSearchParams(window.location.search).has('code')
+}
+
+export async function handleCallback(): Promise<{ returnTo: string }> {
+  const params = new URLSearchParams(window.location.search)
+  const code = params.get('code')
+  const returnTo = params.get('return_to') ?? '/'
+  if (!code) throw new Error('Callback sem código de login.')
+
+  const response = await fetch(`${AVESTAID_SUPABASE_URL}/functions/v1/exchange-code`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${AVESTAID_SUPABASE_ANON_KEY}`,
+    },
+    body: JSON.stringify({ code }),
+  })
+
+  if (!response.ok) {
+    throw new Error('Não foi possível concluir o login pelo AvestaID.')
+  }
+
+  const data = await response.json()
+  const session: AvestaSession = {
+    accessToken: data.access_token,
+    expiresAt: Date.now() + data.expires_in * 1000,
+    appRole: data.app_role,
+    user: {
+      id: data.user.id,
+      email: data.user.email,
+      fullName: data.user.full_name,
+    },
+  }
+  writeSession(session)
+  window.history.replaceState({}, '', window.location.pathname)
+
+  return { returnTo }
+}

@@ -1,11 +1,26 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { MailIcon } from "../components/ui/icons";
 import { APP_VERSION } from "../lib/constants";
 import { PasswordField } from "./PasswordField";
 import { logEvent } from "../features/eventLog/eventLogApi";
+import * as avestaId from "../lib/avestaId";
+
+const AVESTAID_ENABLED = import.meta.env.VITE_AVESTAID_ENABLED === "true";
 
 export function LoginForm() {
+  // Under AvestaID there's no local login form — hand off to the portal,
+  // same as AuthProvider's own boot check.
+  useEffect(() => {
+    if (AVESTAID_ENABLED && !avestaId.hasCallbackCode()) avestaId.ensureSession();
+  }, []);
+
+  if (AVESTAID_ENABLED) return <div className="min-h-screen bg-white" />;
+
+  return <LocalLoginForm />;
+}
+
+function LocalLoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);

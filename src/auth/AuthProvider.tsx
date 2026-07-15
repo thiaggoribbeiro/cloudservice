@@ -3,6 +3,10 @@ import type { Session } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabaseClient";
 import { queryClient } from "../lib/queryClient";
 import type { Profile } from "../types/domain";
+import * as avestaId from "../lib/avestaId";
+
+// Cutover flag for the AvestaID SSO pilot — see the AvestaID rollout plan.
+const AVESTAID_ENABLED = import.meta.env.VITE_AVESTAID_ENABLED === "true";
 
 type AuthContextValue = {
   session: Session | null;
@@ -18,6 +22,13 @@ async function fetchProfile(userId: string): Promise<Profile | null> {
   return data;
 }
 
+// The app only ever reads session.user.id / session.user.email — build a
+// duck-typed stand-in from the AvestaID session instead of touching every
+// call site.
+function avestaSessionToSession(s: avestaId.AvestaSession): Session {
+  return { user: { id: s.user.id, email: s.user.email } } as unknown as Session;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -25,6 +36,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const lastUserId = useRef<string | null>(null);
 
   useEffect(() => {
+    if (AVESTAID_ENABLED) {
+      const checkAvestaId = async () => {
+        // The login page owns the handoff itself via avestaId.handleCallback();
+        // ensureSession() here would otherwise race it and bounce back to the
+        // portal before the one-time code has been redeemed.
+        if (avestaId.hasCallbackCode()) {
+          try {
+            await avestaId.handleCallback();
+          } catch (err) {
+            console.error("Falha no handoff do AvestaID:", err);
+            setLoading(false);
+            return;
+          }
+        }
+
+        const avestaSession = await avestaId.ensureSession();
+        if (!avestaSession) return; // redirecting to the AvestaID portal; page is navigating away
+
+        lastUserId.current = avestaSession.user.id;
+        setSession(avestaSessionToSession(avestaSession));
+        setProfile(await fetchProfile(avestaSession.user.id));
+        setLoading(false);
+      };
+      checkAvestaId();
+      return;
+    }
+
     supabase.auth.getSession().then(async ({ data }) => {
       lastUserId.current = data.session?.user.id ?? null;
       setSession(data.session);

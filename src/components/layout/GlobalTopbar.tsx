@@ -13,6 +13,9 @@ import { useTheme } from "../../lib/useTheme";
 import { SearchIcon, FolderIcon, SunIcon, MoonIcon } from "../ui/icons";
 import { logEvent } from "../../features/eventLog/eventLogApi";
 import type { FileRow, Folder, Profile } from "../../types/domain";
+import * as avestaId from "../../lib/avestaId";
+
+const AVESTAID_ENABLED = import.meta.env.VITE_AVESTAID_ENABLED === "true";
 
 export function GlobalTopbar({
   userEmail,
@@ -198,6 +201,11 @@ export function GlobalTopbar({
                 type="button"
                 onClick={async () => {
                   await logEvent("logout", "sessao", userEmail);
+                  if (AVESTAID_ENABLED) {
+                    await avestaId.signOut();
+                    window.location.href = "/"; // re-boot: AuthProvider will redirect to the AvestaID portal
+                    return;
+                  }
                   supabase.auth.signOut();
                 }}
                 className="btn-ghost w-full py-2 text-sm"
