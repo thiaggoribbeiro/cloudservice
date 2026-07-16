@@ -119,7 +119,22 @@ export function hasCallbackCode(): boolean {
   return new URLSearchParams(window.location.search).has('code')
 }
 
-export async function handleCallback(): Promise<{ returnTo: string }> {
+// React StrictMode (dev) double-invokes effects, which would otherwise
+// redeem this single-use code twice — the second attempt fails with
+// "invalid_or_expired_code", leaving the app stuck on a blank screen.
+// Share the in-flight promise across the duplicate invocation instead of
+// starting a second redemption.
+let inFlightCallback: Promise<{ returnTo: string }> | null = null
+
+export function handleCallback(): Promise<{ returnTo: string }> {
+  if (inFlightCallback) return inFlightCallback
+  inFlightCallback = redeemCallback().finally(() => {
+    inFlightCallback = null
+  })
+  return inFlightCallback
+}
+
+async function redeemCallback(): Promise<{ returnTo: string }> {
   const params = new URLSearchParams(window.location.search)
   const code = params.get('code')
   const returnTo = params.get('return_to') ?? '/'
