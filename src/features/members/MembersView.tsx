@@ -177,16 +177,21 @@ export function MembersView({
                             >
                               Editar
                             </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setDeleteTarget(member);
-                                setOpenMenuId(null);
-                              }}
-                              className="block w-full px-3.5 py-2 text-left text-sm text-brand-primary transition-colors hover:bg-brand-pale/50 dark:hover:bg-white/10"
-                            >
-                              Excluir
-                            </button>
+                            {/* Excluir localmente duplicaria "Revogar acesso" do AvestaID, que já
+                                remove o app_access sem apagar o histórico -- revogação passa a
+                                acontecer só lá quando o AvestaID está ligado. */}
+                            {!AVESTAID_ENABLED && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setDeleteTarget(member);
+                                  setOpenMenuId(null);
+                                }}
+                                className="block w-full px-3.5 py-2 text-left text-sm text-brand-primary transition-colors hover:bg-brand-pale/50 dark:hover:bg-white/10"
+                              >
+                                Excluir
+                              </button>
+                            )}
                           </div>
                         )}
                       </div>
@@ -423,18 +428,25 @@ function EditMemberDialog({
           <label htmlFor="edit-role" className="eyebrow text-brand-gray">
             Acesso
           </label>
-          <select
-            id="edit-role"
-            value={role}
-            onChange={(e) => setRole(e.target.value as Exclude<UserRole, "admin">)}
-            className="field-input"
-          >
-            {ASSIGNABLE_ROLES.map((r) => (
-              <option key={r} value={r}>
-                {ROLE_LABEL[r]}
-              </option>
-            ))}
-          </select>
+          {AVESTAID_ENABLED ? (
+            <>
+              <input id="edit-role" value={ROLE_LABEL[role]} disabled className="field-input opacity-60" />
+              <p className="text-xs text-brand-gray">Nível de acesso é gerenciado pelo AvestaID.</p>
+            </>
+          ) : (
+            <select
+              id="edit-role"
+              value={role}
+              onChange={(e) => setRole(e.target.value as Exclude<UserRole, "admin">)}
+              className="field-input"
+            >
+              {ASSIGNABLE_ROLES.map((r) => (
+                <option key={r} value={r}>
+                  {ROLE_LABEL[r]}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
 
         {error && <p className="text-sm text-brand-primary sm:col-span-2">{error}</p>}
@@ -444,20 +456,32 @@ function EditMemberDialog({
         </button>
 
         <div className="border-t border-brand-border pt-4 dark:border-white/10 sm:col-span-2">
-          <button
-            type="button"
-            onClick={() => {
-              setError(null);
-              resetMutation.mutate();
-            }}
-            disabled={resetMutation.isPending}
-            className="btn-ghost w-full py-2.5 text-sm"
-          >
-            {resetMutation.isPending ? "Gerando senha…" : "Resetar senha"}
-          </button>
-          <p className="mt-2 text-xs text-brand-gray">
-            Gera uma nova senha provisoria; o membro devera definir uma nova senha no proximo acesso.
-          </p>
+          {AVESTAID_ENABLED ? (
+            <button
+              type="button"
+              onClick={() => window.open(`${AVESTAID_PORTAL_URL}/admin/membros?app=cloudservice`, "_blank")}
+              className="btn-ghost w-full py-2.5 text-sm"
+            >
+              Redefinir senha no AvestaID
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  setError(null);
+                  resetMutation.mutate();
+                }}
+                disabled={resetMutation.isPending}
+                className="btn-ghost w-full py-2.5 text-sm"
+              >
+                {resetMutation.isPending ? "Gerando senha…" : "Resetar senha"}
+              </button>
+              <p className="mt-2 text-xs text-brand-gray">
+                Gera uma nova senha provisoria; o membro devera definir uma nova senha no proximo acesso.
+              </p>
+            </>
+          )}
         </div>
       </form>
     </Modal>
