@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Modal } from "../../components/ui/Modal";
+import { useToast } from "../../components/ui/Toast";
 import { listAllFoldersFlat } from "./folderApi";
 import type { Folder } from "../../types/domain";
 
@@ -57,6 +58,7 @@ export function MoveDialog({
 }) {
   const [selected, setSelected] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const showToast = useToast();
 
   const { data: folders = [] } = useQuery({
     queryKey: ["allFoldersFlat"],
@@ -74,7 +76,14 @@ export function MoveDialog({
     mutationFn: () => onMove(selected),
     onSuccess: () => {
       invalidateKeys.forEach((key) => queryClient.invalidateQueries({ queryKey: key }));
+      showToast("success", "Movido com sucesso.");
       onClose();
+    },
+    // Sem isso, um erro do backend (RLS, ou o trigger que impede mover
+    // pastas entre repositórios) era descartado em silêncio -- o diálogo só
+    // fechava ou ficava parado, sem nenhum sinal de que nada tinha ido.
+    onError: (error: unknown) => {
+      showToast("error", error instanceof Error ? error.message : "Não foi possível mover.");
     },
   });
 
