@@ -71,7 +71,24 @@ export async function renameFolder(id: string, name: string): Promise<void> {
 
 export async function moveFolder(id: string, newParentId: string | null): Promise<void> {
   const { data: current } = await supabase.from("folders").select("name").eq("id", id).single();
-  const { error } = await supabase.from("folders").update({ parent_id: newParentId }).eq("id", id);
+
+  // Mesmo ajuste de repository_id do moveFile (fileApi.ts) -- mover uma
+  // pasta pra dentro/fora de um repositório também precisa propagar
+  // repository_id, não só parent_id.
+  let repositoryId: string | null = null;
+  if (newParentId) {
+    const { data: targetFolder } = await supabase
+      .from("folders")
+      .select("repository_id")
+      .eq("id", newParentId)
+      .single();
+    repositoryId = targetFolder?.repository_id ?? null;
+  }
+
+  const { error } = await supabase
+    .from("folders")
+    .update({ parent_id: newParentId, repository_id: repositoryId })
+    .eq("id", id);
   if (error) throw error;
   logEvent("mover_pasta", "pasta", current?.name, id);
 }

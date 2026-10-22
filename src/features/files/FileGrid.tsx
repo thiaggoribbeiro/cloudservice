@@ -483,7 +483,11 @@ export function FileGrid({
         <MoveDialog
           title="Mover pasta"
           excludeFolderId={dialog.folder.id}
-          invalidateKeys={[["folderChildren", currentFolderId], ["folderChildren", dialog.folder.id]]}
+          // Chave parcial ["folderChildren"] invalida a origem e o destino
+          // de uma vez (não dá pra saber o id de destino antes da escolha
+          // no diálogo) -- mesmo padrão já usado em Sidebar.tsx/TrashView.tsx
+          // pra invalidação ampla de ["files"].
+          invalidateKeys={[["folderChildren"]]}
           onMove={(targetId) => moveFolder(dialog.folder.id, targetId)}
           onClose={() => setDialog(null)}
         />
@@ -491,7 +495,7 @@ export function FileGrid({
       {dialog?.kind === "move-file" && (
         <MoveDialog
           title="Mover arquivo"
-          invalidateKeys={[["files", currentFolderId]]}
+          invalidateKeys={[["files"]]}
           onMove={(targetId) => moveFile(dialog.file.id, targetId)}
           onClose={() => setDialog(null)}
         />

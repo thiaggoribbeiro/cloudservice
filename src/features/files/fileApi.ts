@@ -183,7 +183,26 @@ export async function renameFile(id: string, name: string): Promise<void> {
 
 export async function moveFile(id: string, newFolderId: string | null): Promise<void> {
   const { data: current } = await supabase.from("files").select("name").eq("id", id).single();
-  const { error } = await supabase.from("files").update({ folder_id: newFolderId }).eq("id", id);
+
+  // Mantém repository_id coerente com a pasta de destino -- sem isso, mover
+  // um arquivo pra dentro de um repositório deixava repository_id
+  // desatualizado (ex: null, vindo de "Meus arquivos"), quebrando o cálculo
+  // de cota (get_repository_usage) e a visibilidade de admin/gestor pra
+  // arquivos de repositório.
+  let repositoryId: string | null = null;
+  if (newFolderId) {
+    const { data: targetFolder } = await supabase
+      .from("folders")
+      .select("repository_id")
+      .eq("id", newFolderId)
+      .single();
+    repositoryId = targetFolder?.repository_id ?? null;
+  }
+
+  const { error } = await supabase
+    .from("files")
+    .update({ folder_id: newFolderId, repository_id: repositoryId })
+    .eq("id", id);
   if (error) throw error;
   logEvent("mover_arquivo", "arquivo", current?.name, id);
 }
