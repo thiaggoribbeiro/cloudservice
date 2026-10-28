@@ -12,10 +12,11 @@ import { TrashView } from "./features/trash/TrashView";
 import { MembersView } from "./features/members/MembersView";
 import { RepositoriesView } from "./features/repositories/RepositoriesView";
 import { EventLogView } from "./features/eventLog/EventLogView";
+import { CadastroUpdateModal } from "./components/ui/CadastroUpdateModal";
 import type { CreateActionTarget, Folder, ViewSelection } from "./types/domain";
 
 function App() {
-  const { session, profile, loading } = useAuth();
+  const { session, profile, loading, cadastroPending, clearCadastroPending } = useAuth();
   const [view, setView] = useState<ViewSelection>({ kind: "home" });
   const [path, setPath] = useState<Folder[]>([]);
   const [createActionTarget, setCreateActionTarget] = useState<CreateActionTarget | null>(null);
@@ -67,6 +68,10 @@ function App() {
 
   if (profile?.must_change_password) {
     return <ForcePasswordChange />;
+  }
+
+  if (cadastroPending) {
+    return <CadastroUpdateModal accessToken={cadastroPending} onDone={clearCadastroPending} />;
   }
 
   function handleNavigateFolder(newPath: Folder[]) {

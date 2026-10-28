@@ -4,6 +4,7 @@ import { supabase } from "../lib/supabaseClient";
 import { queryClient } from "../lib/queryClient";
 import type { Profile } from "../types/domain";
 import * as avestaId from "../lib/avestaId";
+import { hasCompletedRegistration } from "../lib/collaboratorRegistration";
 
 // Cutover flag for the AvestaID SSO pilot — see the AvestaID rollout plan.
 const AVESTAID_ENABLED = import.meta.env.VITE_AVESTAID_ENABLED === "true";
@@ -13,6 +14,13 @@ type AuthContextValue = {
   profile: Profile | null;
   loading: boolean;
   refreshProfile: () => Promise<void>;
+  // Token do AvestaID enquanto o formulário de atualização cadastral ainda
+  // não foi preenchido (null = já preencheu, ou não se aplica) -- é esse
+  // token que prova a identidade pra function do AvestaID que recebe o
+  // envio. Mesmo gate do portal, replicado aqui porque muita gente
+  // bookmarka a URL deste app direto, sem passar pelo portal.
+  cadastroPending: string | null;
+  clearCadastroPending: () => void;
 };
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -33,6 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [cadastroPending, setCadastroPending] = useState<string | null>(null);
   const lastUserId = useRef<string | null>(null);
 
   useEffect(() => {
@@ -58,6 +67,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(avestaSessionToSession(avestaSession));
         setProfile(await fetchProfile(avestaSession.user.id));
         setLoading(false);
+        if (avestaSession.user.email?.toLowerCase().endsWith("@avesta.com.br")) {
+          hasCompletedRegistration(avestaSession.user.id)
+            .then((done) => setCadastroPending(done ? null : avestaSession.accessToken))
+            .catch((err) => console.error("Falha ao checar atualização cadastral:", err));
+        }
       };
       checkAvestaId();
       return;
@@ -94,7 +108,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ session, profile, loading, refreshProfile }}>
+    <AuthContext.Provider
+      value={{ session, profile, loading, refreshProfile, cadastroPending, clearCadastroPending: () => setCadastroPending(null) }}
+    >
       {children}
     </AuthContext.Provider>
   );
