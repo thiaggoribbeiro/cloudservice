@@ -4,6 +4,8 @@ import { FileGrid } from "../../features/files/FileGrid";
 import { UploadDropzone } from "../../features/files/UploadDropzone";
 import { useFolderContents } from "../../features/folders/useFolderContents";
 import { uploadFile } from "../../features/files/fileApi";
+import { ViewModeSwitcher } from "../../features/files/ViewModeSwitcher";
+import { useViewMode } from "../../features/files/viewMode";
 import type { Folder, UserRole } from "../../types/domain";
 
 export function MainArea({
@@ -27,6 +29,7 @@ export function MainArea({
     restrictRootToOwner ? ownerId : undefined,
   );
   const queryClient = useQueryClient();
+  const { viewMode } = useViewMode();
 
   async function handleUpload(fileList: FileList) {
     for (const file of Array.from(fileList)) {
@@ -40,7 +43,7 @@ export function MainArea({
 
   return (
     <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-      <Topbar path={path} onNavigate={onNavigate} rootLabel={rootLabel} />
+      <Topbar path={path} onNavigate={onNavigate} rootLabel={rootLabel} actions={<ViewModeSwitcher />} />
 
       <UploadDropzone onUpload={handleUpload}>
         <div className="px-4 pb-6 sm:px-6">
@@ -53,6 +56,7 @@ export function MainArea({
               currentFolderId={currentFolderId}
               currentUserId={ownerId}
               userRole={userRole}
+              viewMode={viewMode}
               onOpenFolder={(folder) => onNavigate([...path, folder])}
             />
           )}

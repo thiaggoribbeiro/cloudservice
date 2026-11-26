@@ -206,3 +206,21 @@ export async function moveFile(id: string, newFolderId: string | null): Promise<
   if (error) throw error;
   logEvent("mover_arquivo", "arquivo", current?.name, id);
 }
+
+// Thumbnail URLs for the icon/photo views. Deliberately does NOT touch
+// last_accessed_at (unlike getPreviewUrl): a photo merely scrolling into
+// view isn't the person opening it, and that write would also re-stamp the
+// file's updated_at/updated_by through the set_updated_by trigger.
+export const THUMBNAIL_TTL_SECONDS = 3600;
+
+export async function getThumbnailUrl(file: FileRow, width?: number): Promise<string> {
+  const { data, error } = await supabase.storage
+    .from(STORAGE_BUCKET)
+    .createSignedUrl(
+      file.storage_path,
+      THUMBNAIL_TTL_SECONDS,
+      width ? { transform: { width, height: width, resize: "cover", quality: 70 } } : undefined,
+    );
+  if (error) throw error;
+  return data.signedUrl;
+}

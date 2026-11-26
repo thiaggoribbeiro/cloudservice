@@ -11,6 +11,10 @@ export function isPreviewable(mimeType: string | null): boolean {
   return mimeType.startsWith("image/") || mimeType === "application/pdf";
 }
 
+export function isImageFile(file: { mime_type: string | null }): boolean {
+  return !!file.mime_type?.startsWith("image/");
+}
+
 export type FileCategory =
   | "pdf"
   | "spreadsheet"
