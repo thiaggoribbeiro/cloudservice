@@ -42,9 +42,9 @@ export function MainArea({
       <Topbar path={path} onNavigate={onNavigate} rootLabel={rootLabel} />
 
       <UploadDropzone onUpload={handleUpload}>
-        <div className="p-4 sm:p-6">
+        <div className="px-4 pb-6 sm:px-6">
           {isLoading ? (
-            <p className="eyebrow text-brand-gray">Carregando…</p>
+            <p className="font-body text-body-sm text-light-on-surface-variant">Carregando…</p>
           ) : (
             <FileGrid
               folders={folders}

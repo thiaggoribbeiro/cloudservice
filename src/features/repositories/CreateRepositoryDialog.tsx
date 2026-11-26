@@ -43,9 +43,9 @@ export function CreateRepositoryDialog({
 
   return (
     <Modal title="Novo repositorio" onClose={onClose}>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <label htmlFor="repo-name" className="eyebrow text-brand-gray">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-gutter-md">
+        <div className="flex flex-col">
+          <label htmlFor="repo-name" className="field-label">
             Nome do repositorio
           </label>
           <input
@@ -59,8 +59,8 @@ export function CreateRepositoryDialog({
           />
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label htmlFor="repo-quota" className="eyebrow text-brand-gray">
+        <div className="flex flex-col">
+          <label htmlFor="repo-quota" className="field-label">
             Cota inicial (GB, 1 a 10)
           </label>
           <input
@@ -74,14 +74,14 @@ export function CreateRepositoryDialog({
             className="field-input"
           />
           {!quotaValid && (
-            <p className="text-xs text-brand-gray">A cota deve estar entre 1 GB e 10 GB.</p>
+            <p className="field-hint">A cota deve estar entre 1 GB e 10 GB.</p>
           )}
         </div>
 
-        {error && <p className="text-sm text-brand-primary">{error}</p>}
+        {error && <p role="alert" className="font-body text-body-sm text-light-error">{error}</p>}
 
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <button type="button" onClick={onClose} className="btn-ghost w-full border-transparent sm:w-auto">
+        <div className="mt-2 flex flex-col-reverse gap-gutter-sm sm:flex-row sm:justify-end">
+          <button type="button" onClick={onClose} className="btn-ghost w-full sm:w-auto">
             Cancelar
           </button>
           <button

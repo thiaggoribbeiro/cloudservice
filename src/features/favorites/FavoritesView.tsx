@@ -54,9 +54,9 @@ export function FavoritesView({ userId, userRole }: { userId: string; userRole: 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <Topbar path={[]} onNavigate={() => {}} title="Favoritos" />
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto px-4 pb-6 sm:px-6">
         {isLoading ? (
-          <p className="eyebrow text-brand-gray">Carregando…</p>
+          <p className="font-body text-body-sm text-light-on-surface-variant">Carregando…</p>
         ) : entries.length === 0 ? (
           <EmptyState
             title="Nenhum favorito ainda"
@@ -64,12 +64,12 @@ export function FavoritesView({ userId, userRole }: { userId: string; userRole: 
           />
         ) : (
           <>
-            <div className="flex items-center gap-3 px-4 pb-2">
-              <span className="eyebrow flex-1 text-brand-gray">Nome</span>
-              <span className="eyebrow hidden w-28 shrink-0 text-right text-brand-gray sm:block">
+            <div className="file-list-head">
+              <span className="flex-1">Nome</span>
+              <span className="hidden w-28 shrink-0 text-right sm:block">
                 Modificado
               </span>
-              <span className="eyebrow hidden w-20 shrink-0 text-right text-brand-gray sm:block">
+              <span className="hidden w-20 shrink-0 text-right sm:block">
                 Tamanho
               </span>
               <span className="w-7 shrink-0" />
@@ -83,13 +83,13 @@ export function FavoritesView({ userId, userRole }: { userId: string; userRole: 
                     onClick={() => setSelectedRoot(entry.folder)}
                   >
                     <FolderTileIcon className="h-9 w-9 shrink-0" />
-                    <span className="min-w-0 flex-1 truncate text-sm font-medium text-brand-black dark:text-white">
+                    <span className="min-w-0 flex-1 truncate font-body text-body-md text-light-on-surface">
                       {entry.folder.name}
                     </span>
-                    <span className="mono-tag hidden w-28 shrink-0 text-right text-[12px] text-brand-gray sm:block">
+                    <span className="mono-tag hidden w-28 shrink-0 text-right text-[12px] text-light-on-surface-variant sm:block">
                       {formatRelativeTime(entry.folder.updated_at)}
                     </span>
-                    <span className="mono-tag hidden w-20 shrink-0 text-right text-[12px] text-brand-gray sm:block">
+                    <span className="mono-tag hidden w-20 shrink-0 text-right text-[12px] text-light-on-surface-variant sm:block">
                       —
                     </span>
                     <button
@@ -98,10 +98,10 @@ export function FavoritesView({ userId, userRole }: { userId: string; userRole: 
                         e.stopPropagation();
                         removeFolderMutation.mutate(entry.folder.id);
                       }}
-                      className="shrink-0 rounded-md p-1 text-brand-primary opacity-0 transition-opacity hover:bg-brand-pale/60 group-hover:opacity-100 dark:hover:bg-white/10"
+                      className="btn-icon h-8 w-8 text-light-primary opacity-0 hover:text-light-primary focus-visible:opacity-100 group-hover:opacity-100"
                       aria-label="Remover dos favoritos"
                     >
-                      <StarIcon className="h-4 w-4" fill="currentColor" />
+                      <StarIcon className="h-4 w-4" filled />
                     </button>
                   </div>
                 ) : (
@@ -112,14 +112,14 @@ export function FavoritesView({ userId, userRole }: { userId: string; userRole: 
                       isPreviewable(entry.file.mime_type) ? setPreview(entry.file) : downloadFile(entry.file)
                     }
                   >
-                    <FileTypeIcon name={entry.file.name} mimeType={entry.file.mime_type} className="h-9 w-9 shrink-0 rounded-lg" />
-                    <span className="min-w-0 flex-1 truncate text-sm font-medium text-brand-black dark:text-white">
+                    <FileTypeIcon name={entry.file.name} mimeType={entry.file.mime_type} className="h-9 w-9 shrink-0" />
+                    <span className="min-w-0 flex-1 truncate font-body text-body-md text-light-on-surface">
                       {entry.file.name}
                     </span>
-                    <span className="mono-tag hidden w-28 shrink-0 text-right text-[12px] text-brand-gray sm:block">
+                    <span className="mono-tag hidden w-28 shrink-0 text-right text-[12px] text-light-on-surface-variant sm:block">
                       {formatRelativeTime(entry.file.updated_at)}
                     </span>
-                    <span className="mono-tag hidden w-20 shrink-0 text-right text-[12px] text-brand-gray sm:block">
+                    <span className="mono-tag hidden w-20 shrink-0 text-right text-[12px] text-light-on-surface-variant sm:block">
                       {formatBytes(entry.file.size_bytes)}
                     </span>
                     <button
@@ -128,10 +128,10 @@ export function FavoritesView({ userId, userRole }: { userId: string; userRole: 
                         e.stopPropagation();
                         removeFileMutation.mutate(entry.file.id);
                       }}
-                      className="shrink-0 rounded-md p-1 text-brand-primary opacity-0 transition-opacity hover:bg-brand-pale/60 group-hover:opacity-100 dark:hover:bg-white/10"
+                      className="btn-icon h-8 w-8 text-light-primary opacity-0 hover:text-light-primary focus-visible:opacity-100 group-hover:opacity-100"
                       aria-label="Remover dos favoritos"
                     >
-                      <StarIcon className="h-4 w-4" fill="currentColor" />
+                      <StarIcon className="h-4 w-4" filled />
                     </button>
                   </div>
                 ),

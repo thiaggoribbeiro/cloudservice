@@ -45,7 +45,7 @@ export function CreateFolderDialog({
 
   return (
     <Modal title={title} onClose={onClose}>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-gutter-md">
         <input
           autoFocus
           type="text"
@@ -59,37 +59,37 @@ export function CreateFolderDialog({
           <button
             type="button"
             onClick={() => setLocked((l) => !l)}
-            className="flex items-start gap-3 rounded-lg border border-brand-border px-3.5 py-2.5 text-left transition-colors dark:border-white/10 sm:items-center"
+            className="flex items-start gap-3 rounded-xl border border-light-outline-variant px-4 py-3 text-left transition-colors duration-state-change hover:bg-light-surface-container-low sm:items-center"
           >
             <LockIcon
-              className={`h-[18px] w-[18px] shrink-0 ${locked ? "text-brand-primary" : "text-brand-gray"}`}
+              className={`h-[18px] w-[18px] shrink-0 ${locked ? "text-light-primary" : "text-light-on-surface-variant"}`}
             />
             <span className="flex-1">
-              <span className="block text-sm font-medium text-brand-black dark:text-white">
+              <span className="block font-label text-label-lg text-light-on-surface">
                 Trancar pasta
               </span>
-              <span className="block text-xs text-brand-gray">
+              <span className="block font-body text-body-sm text-light-on-surface-variant">
                 Convidados e usuarios nao poderao exclui-la, mesmo sendo donos
               </span>
             </span>
             <span
               aria-hidden
-              className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
-                locked ? "bg-brand-primary" : "bg-black/15 dark:bg-white/20"
+              className={`relative h-[22px] w-10 shrink-0 rounded-full border border-light-outline-variant transition-colors duration-state-change ${
+                locked ? "bg-light-primary" : "bg-light-surface-container-high"
               }`}
             >
               <span
-                className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
-                  locked ? "translate-x-[18px]" : "translate-x-0.5"
+                className={`absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-light-surface-container-lowest shadow-sm transition-transform duration-surface-enter ease-surface-enter ${
+                  locked ? "translate-x-[18px]" : "translate-x-0"
                 }`}
               />
             </span>
           </button>
         )}
 
-        {error && <p className="text-sm text-brand-primary">{error}</p>}
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <button type="button" onClick={onClose} className="btn-ghost w-full border-transparent sm:w-auto">
+        {error && <p role="alert" className="font-body text-body-sm text-light-error">{error}</p>}
+        <div className="mt-2 flex flex-col-reverse gap-gutter-sm sm:flex-row sm:justify-end">
+          <button type="button" onClick={onClose} className="btn-ghost w-full sm:w-auto">
             Cancelar
           </button>
           <button type="submit" disabled={mutation.isPending || !name.trim()} className="btn-primary w-full sm:w-auto">

@@ -1,45 +1,228 @@
 @import "tailwindcss";
 
-/* Manual light/dark toggle (not just prefers-color-scheme) - a `dark` class
-   on <html>, set by useTheme and bootstrapped pre-paint in index.html. */
+/* ==========================================================================
+   Cloud Service — Design System Aptus
+   Fonte da verdade dos tokens: este arquivo. Referência: design-system-aptus.md
+   O tema é aplicado por <html class="dark" data-theme="dark|light">, definido
+   antes da primeira pintura em index.html e alterado por src/lib/useTheme.ts.
+   Os tokens têm o mesmo nome nos dois temas; o tema escuro só os redefine.
+   ========================================================================== */
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-brand-primary: #ff751f;
-  --color-brand-secondary: #deaa8b;
-  --color-brand-pale: #f0d3c4;
-  --color-brand-gray: #b5b5b5;
-  --color-brand-border: #e0e0e0;
-  --color-brand-black: #000000;
+  /* ---- Marca ---- */
+  --color-light-primary: #a33d00;
+  --color-light-on-primary: #ffffff;
+  --color-light-primary-container: #c4541b;
+  --color-light-on-primary-container: #ffffff;
+  --color-light-secondary: #954925;
+  --color-light-secondary-container: #fdeee6;
+  --color-light-on-secondary-container: #a33d00;
+  --color-light-inverse-primary: #ffb597;
 
-  /* Light theme's canvas - sidebar and page background both sit on this, so
-     the file-list containers (still plain white) read as elevated above it. */
-  --color-light-canvas: #f5f5f5;
+  /* ---- Neutros e superfícies (slate frio) ---- */
+  --color-light-background: #f8fafc;
+  --color-light-on-background: #0f172a;
+  --color-light-surface: #f8fafc;
+  --color-light-surface-container-lowest: #ffffff;
+  --color-light-surface-container-low: #f1f5f9;
+  --color-light-surface-container: #edf1f6;
+  --color-light-surface-container-high: #e2e8f0;
+  --color-light-surface-container-highest: #dce3ec;
+  --color-light-on-surface: #0f172a;
+  --color-light-on-surface-variant: #475569;
+  --color-light-outline: #94a3b8;
+  --color-light-outline-variant: #e2e8f0;
+  --color-light-inverse-surface: #1e293b;
+  --color-light-inverse-on-surface: #f1f5f9;
+  --color-light-scrim: #0f172a;
 
-  /* Dark theme's two-tone system: canvas is the page background, surface is
-     everything that sits a notch "above" it (chrome, cards, popovers, modals). */
-  --color-dark-canvas: #141414;
-  --color-dark-surface: #1b1a19;
+  /* ---- Erro ---- */
+  --color-light-error: #ba1a1a;
+  --color-light-on-error: #ffffff;
+  --color-light-error-container: #ffdad6;
+  --color-light-on-error-container: #93000a;
 
-  /* A single typeface for the whole app; hierarchy comes from weight and size, not from mixing families. */
-  --font-body: "Archivo", "Helvetica Neue", sans-serif;
+  /* ---- Status (informação, nunca decoração) ---- */
+  --color-status-vigente: #15803d;
+  --color-status-vigente-container: #dcfce7;
+  --color-on-status-vigente-container: #14532d;
+  --color-status-avencer: #b45309;
+  --color-status-avencer-container: #fef3c7;
+  --color-on-status-avencer-container: #78350f;
+  --color-status-tramite: #1d4ed8;
+  --color-status-tramite-container: #dbeafe;
+  --color-on-status-tramite-container: #1e3a8a;
+  --color-status-pendente: #2e6bae;
+  --color-status-pendente-container: #e2ecf7;
+  --color-on-status-pendente-container: #1d4a7a;
+  --color-status-na: #8a94a3;
+  --color-status-na-container: #e2e8f0;
+  --color-on-status-na-container: #1e293b;
 
-  --animate-rise: rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  /* ---- Tipografia ---- */
+  --font-display: "Red Hat Text", "Segoe UI", sans-serif;
+  --font-headline: "Red Hat Text", "Segoe UI", sans-serif;
+  --font-title: "Lato", "Segoe UI", sans-serif;
+  --font-body: "Lato", "Segoe UI", sans-serif;
+  --font-label: "Lato", "Segoe UI", sans-serif;
+  --font-mono: "Source Code Pro", ui-monospace, monospace;
+
+  --text-display-lg: 36px;
+  --text-display-lg--line-height: 44px;
+  --text-display-lg--letter-spacing: -0.5px;
+  --text-display-lg--font-weight: 700;
+  --text-headline-lg: 28px;
+  --text-headline-lg--line-height: 34px;
+  --text-headline-lg--letter-spacing: -0.25px;
+  --text-headline-lg--font-weight: 700;
+  --text-headline-md: 22px;
+  --text-headline-md--line-height: 28px;
+  --text-headline-md--letter-spacing: -0.15px;
+  --text-headline-md--font-weight: 600;
+  --text-headline-sm: 18px;
+  --text-headline-sm--line-height: 24px;
+  --text-headline-sm--font-weight: 600;
+  --text-title-md: 16px;
+  --text-title-md--line-height: 22px;
+  --text-title-md--font-weight: 700;
+  --text-body-lg: 15px;
+  --text-body-lg--line-height: 22px;
+  --text-body-lg--font-weight: 400;
+  --text-body-md: 14px;
+  --text-body-md--line-height: 20px;
+  --text-body-md--font-weight: 400;
+  --text-body-sm: 13px;
+  --text-body-sm--line-height: 18px;
+  --text-body-sm--font-weight: 400;
+  --text-label-lg: 14px;
+  --text-label-lg--line-height: 20px;
+  --text-label-lg--letter-spacing: 0.1px;
+  --text-label-lg--font-weight: 700;
+  --text-label-md: 12px;
+  --text-label-md--line-height: 16px;
+  --text-label-md--letter-spacing: 0.2px;
+  --text-label-md--font-weight: 700;
+  --text-label-sm: 12px;
+  --text-label-sm--line-height: 16px;
+  --text-label-sm--letter-spacing: 0.3px;
+  --text-label-sm--font-weight: 600;
+  --text-mono-md: 13px;
+  --text-mono-md--line-height: 18px;
+  --text-mono-md--font-weight: 500;
+
+  /* ---- Espaçamento ---- */
+  --spacing-gutter-xs: 4px;
+  --spacing-gutter-sm: 8px;
+  --spacing-gutter-md: 16px;
+  --spacing-gutter-lg: 24px;
+  --spacing-gutter-xl: 32px;
+  --spacing-section: 40px;
+  --spacing-page-margin: 24px;
+
+  /* ---- Movimento ---- */
+  --ease-state-change: ease-out;
+  --ease-surface-enter: cubic-bezier(0.2, 0, 0, 1);
+  --ease-surface-exit: cubic-bezier(0.3, 0, 1, 1);
+
+  --animate-rise: rise 560ms cubic-bezier(0.2, 0, 0, 1) backwards;
+  --animate-fade: fade 420ms ease-out backwards;
+  --animate-pop: pop 480ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  --animate-grow-x: grow-x 1100ms cubic-bezier(0.2, 0, 0, 1) backwards;
+  --animate-drawer-in: drawer-in 220ms cubic-bezier(0.2, 0, 0, 1) backwards;
+  --animate-menu-in: drawer-in 160ms cubic-bezier(0.2, 0, 0, 1) backwards;
+  --animate-nav-in: nav-in 220ms cubic-bezier(0.2, 0, 0, 1) backwards;
+}
+
+/* ---- Tema escuro: mesmos tokens, grafite neutro ---- */
+.dark,
+[data-theme="dark"] {
+  --color-light-primary: #f2894f;
+  --color-light-on-primary: #1c0a01;
+  --color-light-primary-container: #ffa472;
+  --color-light-on-primary-container: #1c0a01;
+  --color-light-secondary: #f2a27a;
+  --color-light-secondary-container: #3a2316;
+  --color-light-on-secondary-container: #ffb68c;
+  --color-light-inverse-primary: #a33d00;
+
+  --color-light-background: #0e0e0f;
+  --color-light-on-background: #e7e7ea;
+  --color-light-surface: #141416;
+  --color-light-surface-container-lowest: #1b1b1d;
+  --color-light-surface-container-low: #222225;
+  --color-light-surface-container: #28282c;
+  --color-light-surface-container-high: #313136;
+  --color-light-surface-container-highest: #3a3a40;
+  --color-light-on-surface: #e7e7ea;
+  --color-light-on-surface-variant: #a1a1aa;
+  --color-light-outline: #6e6e78;
+  --color-light-outline-variant: #2f2f34;
+  --color-light-inverse-surface: #e7e7ea;
+  --color-light-inverse-on-surface: #18181b;
+  --color-light-scrim: #000000;
+
+  --color-light-error: #f87171;
+  --color-light-on-error: #1b1b1d;
+  --color-light-error-container: #4a1c1c;
+  --color-light-on-error-container: #fecaca;
+
+  --color-status-vigente: #2fae5f;
+  --color-status-vigente-container: #123222;
+  --color-on-status-vigente-container: #86efac;
+  --color-status-avencer: #fbbf24;
+  --color-status-avencer-container: #3a2a0c;
+  --color-on-status-avencer-container: #fcd34d;
+  --color-status-tramite: #60a5fa;
+  --color-status-tramite-container: #172a4f;
+  --color-on-status-tramite-container: #bfdbfe;
+  --color-status-pendente: #5f95d2;
+  --color-status-pendente-container: #17283d;
+  --color-on-status-pendente-container: #bcd5f2;
+  --color-status-na: #5e5e66;
+  --color-status-na-container: #313136;
+  --color-on-status-na-container: #d4d4d8;
+}
+
+/* Login e troca de senha ficam sempre no tema claro. */
+.force-light {
+  --color-light-primary: #a33d00;
+  --color-light-on-primary: #ffffff;
+  --color-light-primary-container: #c4541b;
+  --color-light-secondary-container: #fdeee6;
+  --color-light-on-secondary-container: #a33d00;
+  --color-light-background: #f8fafc;
+  --color-light-surface: #f8fafc;
+  --color-light-surface-container-lowest: #ffffff;
+  --color-light-surface-container-low: #f1f5f9;
+  --color-light-surface-container: #edf1f6;
+  --color-light-surface-container-high: #e2e8f0;
+  --color-light-on-surface: #0f172a;
+  --color-light-on-surface-variant: #475569;
+  --color-light-outline: #94a3b8;
+  --color-light-outline-variant: #e2e8f0;
+  --color-light-error: #ba1a1a;
+  --color-light-error-container: #ffdad6;
+  --color-light-on-error-container: #93000a;
+  color-scheme: light;
+}
+
+@utility duration-state-change {
+  transition-duration: 120ms;
+}
+@utility duration-surface-enter {
+  transition-duration: 220ms;
+}
+@utility duration-surface-exit {
+  transition-duration: 150ms;
 }
 
 @layer base {
-  * {
-    border-color: var(--color-brand-border);
-  }
-  .dark * {
-    border-color: rgb(255 255 255 / 0.1);
-  }
-  /* Screens marked .force-light (the login form) must stay light regardless
-     of the app-wide dark class on <html> - this comes after ".dark *" above
-     so it wins the tie and resets borders back for anything inside. */
-  .force-light,
-  .force-light * {
-    border-color: var(--color-brand-border);
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-light-outline-variant);
   }
 
   html {
@@ -49,34 +232,43 @@
   html.dark {
     color-scheme: dark;
   }
+  html.theme-transition,
+  html.theme-transition * {
+    transition:
+      background-color 200ms ease-out,
+      border-color 200ms ease-out,
+      color 200ms ease-out !important;
+  }
 
   body {
     margin: 0;
-    color: var(--color-brand-black);
-    background-color: var(--color-light-canvas);
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--color-light-on-background);
+    background-color: var(--color-light-background);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-  }
-  .dark body {
-    color: #ffffff;
-    background-color: var(--color-dark-canvas);
   }
 
   h1,
   h2,
   h3 {
-    font-weight: 800;
-    letter-spacing: -0.01em;
+    font-family: var(--font-headline);
   }
 
   ::selection {
-    background: var(--color-brand-primary);
-    color: white;
+    background: var(--color-light-secondary-container);
+    color: var(--color-light-on-secondary-container);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-brand-primary);
+    outline: 2px solid var(--color-light-primary);
     outline-offset: 2px;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-light-outline);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -84,216 +276,252 @@
     *::before,
     *::after {
       animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+      transition-delay: 0ms !important;
     }
   }
 }
 
 @layer components {
-  /* Small uppercase tracked label used to caption a section or field */
+  /* Material Symbols — use .ms-icon (a regra do Google força 24px e vence o Tailwind). */
+  .ms-icon {
+    font-family: "Material Symbols Outlined";
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+    user-select: none;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "liga";
+    font-variation-settings:
+      "FILL" 0,
+      "wght" 400,
+      "GRAD" 0,
+      "opsz" 24;
+  }
+  .material-symbols-filled {
+    font-variation-settings:
+      "FILL" 1,
+      "wght" 400,
+      "GRAD" 0,
+      "opsz" 24;
+  }
+
+  /* Rótulo de campo / legenda de seção — sentence case, sem caixa-alta. */
   .eyebrow {
+    font-family: var(--font-label);
+    font-size: var(--text-label-md);
+    line-height: var(--text-label-md--line-height);
+    letter-spacing: var(--text-label-md--letter-spacing);
     font-weight: 700;
-    font-size: 0.6875rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
   }
 
-  /* Tabular stamp for metadata: sizes, dates, paths, tokens - same typeface, tuned for data */
+  /* Datas, tamanhos e códigos em tabela. */
   .mono-tag {
+    font-family: var(--font-mono);
+    font-weight: 500;
     font-variant-numeric: tabular-nums;
-    letter-spacing: 0.01em;
   }
 
-  /* One shared shape/size for every button in the app; only the fill changes. */
+  /* ---- Card — CARD_CLASS ---- */
+  .card {
+    @apply rounded-2xl border border-light-outline-variant bg-light-surface-container-lowest shadow-sm;
+  }
+  .card-interactive {
+    @apply cursor-pointer transition-all duration-state-change ease-state-change hover:border-light-primary hover:shadow-md;
+  }
+
+  /* ---- Botões — BTN_PRIMARY / BTN_SECONDARY ---- */
   .btn-primary,
-  .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold transition-all duration-150;
+  .btn-ghost,
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2 font-label text-label-md transition-colors duration-state-change ease-state-change disabled:cursor-not-allowed disabled:opacity-60;
   }
-
-  /* Primary call to action - identical in both themes, it already pops on either */
   .btn-primary {
-    @apply bg-brand-primary text-white shadow-sm;
+    @apply bg-light-primary text-light-on-primary hover:enabled:bg-light-primary-container;
   }
-  .btn-primary:hover:not(:disabled) {
-    @apply -translate-y-px shadow-md;
-    background-color: #d9631a;
-  }
-  .btn-primary:active:not(:disabled) {
-    @apply translate-y-0 shadow-none;
-  }
-  .btn-primary:disabled {
-    @apply cursor-not-allowed opacity-50;
-  }
-
-  /* Quiet secondary action */
   .btn-ghost {
-    @apply border border-brand-border text-brand-black hover:border-brand-secondary hover:bg-brand-pale/40;
+    @apply border border-light-outline-variant bg-light-surface-container-lowest text-light-on-surface hover:enabled:bg-light-surface-container-low;
   }
-  .dark .btn-ghost {
-    @apply border-white/15 text-white hover:border-brand-secondary hover:bg-white/10;
+  .btn-danger {
+    @apply bg-light-error text-light-on-error hover:enabled:opacity-90;
   }
 
-  /* Boxed input used across dialogs/forms */
+  /* Botão de ícone — sempre com aria-label. */
+  .btn-icon {
+    @apply inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-light-on-surface-variant transition-colors duration-state-change ease-state-change hover:bg-light-surface-container hover:text-light-on-surface;
+  }
+
+  /* ---- Input — INPUT_CLASS ---- */
   .field-input {
-    @apply w-full rounded-md border border-brand-border bg-white px-3 py-2 text-sm text-brand-black outline-none transition-colors duration-150 placeholder:text-brand-gray focus:border-brand-primary;
+    @apply w-full rounded-lg border border-light-outline-variant bg-light-surface px-3 py-2 font-body text-body-md text-light-on-surface outline-none transition-colors duration-state-change focus:border-light-primary focus:ring-1 focus:ring-light-primary disabled:opacity-70;
   }
-  .dark .field-input {
-    @apply border-white/15 bg-white/5 text-white placeholder:text-white/35;
+  .field-label {
+    @apply mb-1.5 block font-label text-label-md text-light-on-surface;
+  }
+  .field-hint {
+    @apply mt-1.5 font-body text-body-sm text-light-on-surface-variant;
+  }
+  select.field-input option {
+    background-color: var(--color-light-surface-container-lowest);
+    color: var(--color-light-on-surface);
   }
 
-  /* Native <select> popups don't reliably pick up color-scheme on every
-     platform (Windows Chromium in particular ignores it) - styling <option>
-     directly is the fix that actually reaches the dropdown's own rendering. */
-  .dark select.field-input option {
-    background-color: #1b1a19;
-    color: #ffffff;
-  }
-
-  /* Chrome/Edge paint autofilled fields with their own background once you
-     leave them, which can end up close enough to the text color to read as
-     blank - force the field's own colors back with the inset-shadow trick. */
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
   input:-webkit-autofill:active {
-    -webkit-text-fill-color: #000000;
-    -webkit-box-shadow: 0 0 0px 1000px #ffffff inset;
-    box-shadow: 0 0 0px 1000px #ffffff inset;
+    -webkit-text-fill-color: var(--color-light-on-surface);
+    -webkit-box-shadow: 0 0 0 1000px var(--color-light-surface) inset;
+    box-shadow: 0 0 0 1000px var(--color-light-surface) inset;
     transition: background-color 9999s ease-in-out 0s;
   }
-  .dark input:-webkit-autofill,
-  .dark input:-webkit-autofill:hover,
-  .dark input:-webkit-autofill:focus,
-  .dark input:-webkit-autofill:active {
-    -webkit-text-fill-color: #ffffff;
-    -webkit-box-shadow: 0 0 0px 1000px var(--color-dark-surface) inset;
-    box-shadow: 0 0 0px 1000px var(--color-dark-surface) inset;
-  }
-  /* Re-assert the light autofill colors inside .force-light, since the rule
-     above keys off ".dark" as a plain ancestor class and would otherwise
-     leak through onto the always-light login form. */
-  .force-light input:-webkit-autofill,
-  .force-light input:-webkit-autofill:hover,
-  .force-light input:-webkit-autofill:focus,
-  .force-light input:-webkit-autofill:active {
-    -webkit-text-fill-color: #000000;
-    -webkit-box-shadow: 0 0 0px 1000px #ffffff inset;
-    box-shadow: 0 0 0px 1000px #ffffff inset;
-  }
 
-  /* Icon-prefixed pill input - makes the type-here target unmistakable
-     (used on the login screen, which is always light, so no dark variant). */
+  /* Input com ícone à esquerda (login). */
   .field-pill {
-    @apply w-full rounded-xl border border-transparent bg-black/[0.04] py-3 pl-11 pr-4 text-base text-brand-black outline-none transition-colors duration-200 placeholder:text-brand-gray/70 focus:border-brand-primary focus:bg-white;
+    @apply w-full rounded-lg border border-light-outline-variant bg-light-surface py-2.5 pl-10 pr-3 font-body text-body-md text-light-on-surface outline-none transition-colors duration-state-change focus:border-light-primary focus:ring-1 focus:ring-light-primary;
   }
   .field-pill-with-action {
-    @apply pr-12;
+    @apply pr-11;
   }
   .field-pill-icon {
-    @apply pointer-events-none absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-brand-gray;
+    @apply pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-light-outline;
   }
   .field-pill-reveal {
-    @apply absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-brand-primary transition-colors hover:bg-brand-pale/60 hover:text-[#7f3712];
+    @apply absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-light-on-surface-variant transition-colors duration-state-change hover:bg-light-surface-container hover:text-light-on-surface;
   }
   .field-pill::-ms-reveal,
   .field-pill::-ms-clear {
     display: none;
   }
 
-  /* File / folder tile in the main grid (combine with "group" in markup for the hover-revealed menu button) */
-  .tile {
-    @apply relative flex cursor-pointer flex-col items-center gap-2.5 rounded-xl border border-brand-border bg-white p-4 transition-all duration-150;
+  /* ---- Menu suspenso ---- */
+  .menu-surface {
+    @apply animate-menu-in rounded-xl border border-light-outline-variant bg-light-surface-container-lowest py-1 shadow-xl;
   }
-  .tile:hover {
-    @apply -translate-y-0.5 border-brand-secondary shadow-[0_8px_20px_-12px_rgba(0,0,0,0.25)];
+  .menu-item {
+    @apply flex w-full items-center gap-2.5 px-3.5 py-2 text-left font-body text-body-md text-light-on-surface transition-colors duration-state-change hover:bg-light-surface-container;
   }
-  .dark .tile {
-    @apply border-white/10 bg-dark-surface;
-  }
-
-  .tile-icon {
-    @apply flex h-14 w-14 items-center justify-center rounded-lg bg-brand-pale/60 text-3xl;
-  }
-  .dark .tile-icon {
-    @apply bg-white/10;
+  .menu-item-danger {
+    @apply text-light-error hover:bg-light-error-container/50;
   }
 
-  /* Single bordered container holding every row in a file/folder list - rows
-     inside it are separated by a hairline divider, not their own boxes.
-     Rounding is applied to the first/last row rather than clipped via
-     overflow-hidden on the container, since that would also clip each
-     row's absolutely-positioned "..." dropdown menu. */
+  /* ---- Lista de arquivos (tabela em card) ---- */
   .file-list {
-    @apply divide-y divide-brand-border rounded-lg border border-brand-border bg-white;
-  }
-  .dark .file-list {
-    @apply divide-white/10 border-white/10 bg-dark-surface;
+    @apply divide-y divide-light-outline-variant rounded-2xl border border-light-outline-variant bg-light-surface-container-lowest shadow-sm;
   }
   .file-list > .file-row:first-child {
-    border-top-left-radius: 0.5rem;
-    border-top-right-radius: 0.5rem;
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
   }
   .file-list > .file-row:last-child {
-    border-bottom-left-radius: 0.5rem;
-    border-bottom-right-radius: 0.5rem;
+    border-bottom-left-radius: 1rem;
+    border-bottom-right-radius: 1rem;
   }
-
-  /* A row inside .file-list (combine with "group" in markup for the hover-revealed menu button) */
+  .file-list-head {
+    @apply flex items-center gap-3 px-3 pb-2 font-label text-label-md text-light-on-surface-variant sm:px-4;
+  }
   .file-row {
-    @apply relative flex w-full min-w-0 cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors duration-150 sm:px-4;
+    @apply relative flex w-full min-w-0 cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors duration-state-change sm:px-4;
   }
   .file-row:hover {
-    @apply bg-brand-pale/20;
-  }
-  .dark .file-row:hover {
-    @apply bg-white/[0.06];
+    @apply bg-light-surface-container-low;
   }
 
-  /* Die-cut manifest tab: the recurring signature shape (a hanging folder tab) */
-  .manifest-tab {
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 12% 100%, 0 70%);
+  /* ---- Tile (grade de arquivos) ---- */
+  .tile {
+    @apply relative flex cursor-pointer flex-col items-center gap-2.5 rounded-2xl border border-light-outline-variant bg-light-surface-container-lowest p-4 shadow-sm transition-all duration-state-change ease-state-change;
+  }
+  .tile:hover {
+    @apply -translate-y-0.5 border-light-primary shadow-md;
+  }
+  .tile-icon {
+    @apply flex h-14 w-14 items-center justify-center rounded-xl bg-light-surface-container-low text-3xl;
+  }
+
+  /* ---- Tabela ---- */
+  .data-table {
+    @apply w-full border-collapse text-left font-body text-body-md;
+  }
+  .data-table thead {
+    @apply border-b border-light-outline-variant bg-light-surface-container-low;
+  }
+  .data-table th {
+    @apply whitespace-nowrap px-4 py-3 font-label text-label-md text-light-on-surface-variant;
+  }
+  .data-table td {
+    @apply px-4 py-3 text-light-on-surface;
+  }
+  .data-table tbody tr {
+    @apply border-b border-light-outline-variant transition-colors duration-state-change last:border-b-0 hover:bg-light-surface-container-low;
+  }
+
+  /* ---- Badges ---- */
+  .badge {
+    @apply inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1 font-label text-label-sm;
+  }
+  .badge-neutral {
+    @apply bg-light-surface-container-high text-light-on-surface;
+  }
+  .badge-primary {
+    @apply bg-light-secondary-container text-light-on-secondary-container;
+  }
+  .badge-success {
+    @apply bg-status-vigente-container text-on-status-vigente-container;
+  }
+  .badge-warning {
+    @apply bg-status-avencer-container text-on-status-avencer-container;
+  }
+  .badge-info {
+    @apply bg-status-pendente-container text-on-status-pendente-container;
+  }
+  .badge-error {
+    @apply bg-light-error-container text-light-on-error-container;
+  }
+
+  /* ---- Chip de filtro ---- */
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full border border-light-outline-variant px-3 py-1.5 font-label text-label-sm text-light-on-surface-variant transition-colors duration-state-change hover:bg-light-surface-container hover:text-light-on-surface;
+  }
+  .chip-active {
+    @apply border-transparent bg-light-secondary-container text-light-on-secondary-container hover:bg-light-secondary-container hover:text-light-on-secondary-container;
+  }
+
+  /* ---- Cabeçalho de página ---- */
+  .page-title {
+    @apply font-headline text-headline-md text-light-on-surface;
+  }
+  .section-title {
+    @apply font-headline text-headline-sm text-light-on-surface;
   }
 }
 
 @layer utilities {
-  /* Faint tactile grain, meant to sit under content at very low opacity */
-  .bg-grain {
-    position: relative;
-  }
-  .bg-grain::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.045;
-    mix-blend-mode: multiply;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-
-  /* Ambient warm washes for the login canvas */
-  .wash-pale {
-    background: radial-gradient(circle, var(--color-brand-pale) 0%, transparent 70%);
-  }
-  .wash-secondary {
-    background: radial-gradient(circle, var(--color-brand-secondary) 0%, transparent 70%);
-  }
-
-  /* Staggered entrance timings for the login sequence */
   .stagger-0 {
     animation: var(--animate-rise);
   }
   .stagger-1 {
     animation: var(--animate-rise);
-    animation-delay: 70ms;
+    animation-delay: 60ms;
   }
   .stagger-2 {
     animation: var(--animate-rise);
-    animation-delay: 140ms;
+    animation-delay: 120ms;
   }
   .stagger-3 {
     animation: var(--animate-rise);
-    animation-delay: 190ms;
+    animation-delay: 180ms;
   }
   .stagger-4 {
     animation: var(--animate-rise);
@@ -308,10 +536,33 @@
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(14px) scale(0.98);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.6) rotate(-12deg);
+  }
+}
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes drawer-in {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+}
+@keyframes nav-in {
+  from {
+    transform: translateX(-100%);
   }
 }

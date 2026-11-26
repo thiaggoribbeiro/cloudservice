@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
+import { CheckCircleIcon, ErrorIcon } from "./icons";
 
 type ToastKind = "success" | "error";
 type ToastItem = { id: number; kind: ToastKind; message: string };
@@ -19,18 +20,19 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={showToast}>
       {children}
-      <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[100] flex flex-col items-center gap-2 px-4">
+      <div className="pointer-events-none fixed inset-x-4 bottom-5 z-[100] flex flex-col items-end gap-2 sm:left-auto sm:right-5">
         {toasts.map((t) => (
           <div
             key={t.id}
-            role="status"
-            className={`pointer-events-auto w-full max-w-sm rounded-lg border px-4 py-3 text-sm shadow-[0_12px_32px_-12px_rgba(0,0,0,0.35)] ${
-              t.kind === "success"
-                ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200"
-                : "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200"
-            }`}
+            role={t.kind === "error" ? "alert" : "status"}
+            className="animate-drawer-in pointer-events-auto flex w-full max-w-sm items-start gap-2.5 rounded-xl bg-light-inverse-surface px-4 py-3 font-body text-body-md text-light-inverse-on-surface shadow-lg"
           >
-            {t.message}
+            {t.kind === "success" ? (
+              <CheckCircleIcon className="h-5 w-5 text-light-inverse-primary" />
+            ) : (
+              <ErrorIcon className="h-5 w-5 text-light-inverse-primary" />
+            )}
+            <span className="min-w-0 pt-px">{t.message}</span>
           </div>
         ))}
       </div>

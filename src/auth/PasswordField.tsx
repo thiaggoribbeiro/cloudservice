@@ -18,12 +18,12 @@ export function PasswordField({
   const labelText = visible ? "Ocultar senha" : "Mostrar senha";
 
   return (
-    <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="eyebrow text-brand-gray">
+    <div className="flex flex-col">
+      <label htmlFor={id} className="field-label">
         {label}
       </label>
       <div className="relative">
-        <LockIcon className="field-pill-icon" />
+        <LockIcon className="field-pill-icon h-[18px] w-[18px]" />
         <input
           id={id}
           type={visible ? "text" : "password"}
@@ -32,7 +32,7 @@ export function PasswordField({
           value={value}
           onChange={onChange}
           className="field-pill field-pill-with-action"
-          placeholder="........"
+          placeholder="••••••••"
         />
         <button
           type="button"
@@ -42,9 +42,9 @@ export function PasswordField({
           className="field-pill-reveal"
         >
           {visible ? (
-            <EyeOffIcon className="h-[19px] w-[19px]" />
+            <EyeOffIcon className="h-[18px] w-[18px]" />
           ) : (
-            <EyeIcon className="h-[19px] w-[19px]" />
+            <EyeIcon className="h-[18px] w-[18px]" />
           )}
         </button>
       </div>

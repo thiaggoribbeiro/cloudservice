@@ -1,14 +1,23 @@
-export function EmptyState({ title, description }: { title: string; description: string }) {
+import type { ReactNode } from "react";
+import { InboxIcon } from "./icons";
+
+export function EmptyState({
+  title,
+  description,
+  icon,
+  action,
+}: {
+  title: string;
+  description: string;
+  icon?: ReactNode;
+  action?: ReactNode;
+}) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 py-24 text-center">
-      <div
-        className="manifest-tab flex h-12 w-16 items-end justify-center bg-brand-pale pb-2 dark:bg-white/10"
-        aria-hidden
-      >
-        <div className="h-2 w-2 rounded-[1px] bg-brand-primary/70" />
-      </div>
-      <h3 className="text-xl text-brand-black dark:text-white">{title}</h3>
-      <p className="max-w-xs text-sm text-brand-gray">{description}</p>
+    <div className="card animate-fade flex flex-col items-center justify-center gap-2 p-10 text-center">
+      <span className="mb-1 text-light-outline">{icon ?? <InboxIcon className="h-9 w-9" />}</span>
+      <h3 className="font-title text-title-md text-light-on-surface">{title}</h3>
+      <p className="max-w-sm font-body text-body-sm text-light-on-surface-variant">{description}</p>
+      {action && <div className="mt-3">{action}</div>}
     </div>
   );
 }

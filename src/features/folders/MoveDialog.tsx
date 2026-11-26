@@ -89,14 +89,14 @@ export function MoveDialog({
 
   return (
     <Modal title={title} onClose={onClose}>
-      <div className="flex max-h-64 flex-col gap-0.5 overflow-y-auto rounded-lg border border-brand-border p-2 dark:border-white/10">
+      <div className="flex max-h-72 flex-col gap-0.5 overflow-y-auto rounded-xl border border-light-outline-variant p-1.5">
         <button
           type="button"
           onClick={() => setSelected(null)}
-          className={`rounded-md px-2.5 py-1.5 text-left text-sm transition-colors ${
+          className={`rounded-lg px-3 py-2 text-left font-body text-body-md transition-colors duration-state-change ${
             selected === null
-              ? "bg-brand-pale font-semibold dark:bg-white/10"
-              : "hover:bg-brand-pale/50 dark:hover:bg-white/5"
+              ? "bg-light-secondary-container font-bold text-light-on-secondary-container"
+              : "text-light-on-surface hover:bg-light-surface-container"
           }`}
         >
           Meu Drive (raiz)
@@ -107,10 +107,10 @@ export function MoveDialog({
             type="button"
             onClick={() => setSelected(folder.id)}
             style={{ paddingLeft: `${depth * 16 + 10}px` }}
-            className={`rounded-md px-2.5 py-1.5 text-left text-sm transition-colors ${
+            className={`truncate rounded-lg px-3 py-2 text-left font-body text-body-md transition-colors duration-state-change ${
               selected === folder.id
-                ? "bg-brand-pale font-semibold dark:bg-white/10"
-                : "hover:bg-brand-pale/50 dark:hover:bg-white/5"
+                ? "bg-light-secondary-container font-bold text-light-on-secondary-container"
+                : "text-light-on-surface hover:bg-light-surface-container"
             }`}
           >
             {folder.name}
@@ -118,8 +118,8 @@ export function MoveDialog({
         ))}
       </div>
 
-      <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <button type="button" onClick={onClose} className="btn-ghost w-full border-transparent sm:w-auto">
+      <div className="mt-gutter-lg flex flex-col-reverse gap-gutter-sm sm:flex-row sm:justify-end">
+        <button type="button" onClick={onClose} className="btn-ghost w-full sm:w-auto">
           Cancelar
         </button>
         <button type="button" disabled={mutation.isPending} onClick={() => mutation.mutate()} className="btn-primary w-full sm:w-auto">

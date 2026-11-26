@@ -5,7 +5,7 @@ import { EmptyState } from "../../components/ui/EmptyState";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { formatBytes } from "../../lib/format";
 import { FileTypeIcon } from "../../components/ui/FileTypeIcon";
-import { FolderTileIcon } from "../../components/ui/icons";
+import { FolderTileIcon, TrashIcon } from "../../components/ui/icons";
 import {
   listTrashedFolders,
   listTrashedFiles,
@@ -23,14 +23,14 @@ function DeleteAction({ deletedAt, onConfirm }: { deletedAt: string | null; onCo
 
   if (daysLeft > 0) {
     return (
-      <span className="mono-tag text-[11px] text-brand-gray" title="Itens ficam 30 dias na lixeira antes de poderem ser excluidos para sempre">
+      <span className="badge badge-neutral" title="Itens ficam 30 dias na lixeira antes de poderem ser excluidos para sempre">
         Disponivel em {daysLeft} {daysLeft === 1 ? "dia" : "dias"}
       </span>
     );
   }
 
   return (
-    <button type="button" onClick={onConfirm} className="text-sm text-brand-gray hover:text-brand-black hover:underline dark:hover:text-white">
+    <button type="button" onClick={onConfirm} className="rounded-lg px-2 py-1 font-label text-label-md text-light-error transition-colors duration-state-change hover:bg-light-error-container/50">
       Excluir definitivamente
     </button>
   );
@@ -87,19 +87,22 @@ export function TrashView() {
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <Topbar path={[]} onNavigate={() => {}} title="Lixeira" />
-      <div className="flex items-center justify-between border-b border-brand-border px-6 py-3 dark:border-white/10">
-        <p className="mono-tag text-xs text-brand-gray">
-          Itens ficam aqui por 30 dias antes da exclusao definitiva
-        </p>
-        {hasEligibleItems && (
-          <button type="button" onClick={() => setConfirmEmptyTrash(true)} className="btn-ghost text-sm">
-            Esvaziar lixeira
-          </button>
-        )}
-      </div>
+      <Topbar
+        path={[]}
+        onNavigate={() => {}}
+        title="Lixeira"
+        subtitle="Itens ficam aqui por 30 dias antes da exclusão definitiva."
+        actions={
+          hasEligibleItems && (
+            <button type="button" onClick={() => setConfirmEmptyTrash(true)} className="btn-ghost text-light-error">
+              <TrashIcon className="h-[18px] w-[18px]" />
+              Esvaziar lixeira
+            </button>
+          )
+        }
+      />
 
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto px-4 pb-6 sm:px-6">
         {isEmpty ? (
           <EmptyState title="Lixeira vazia" description="Itens excluidos aparecem aqui por 30 dias." />
         ) : (
@@ -109,7 +112,7 @@ export function TrashView() {
                 key={folder.id}
                 className="file-row flex items-center justify-between"
               >
-                <span className="flex items-center gap-2.5 truncate text-sm font-medium">
+                <span className="flex min-w-0 items-center gap-3 truncate font-body text-body-md text-light-on-surface">
                   <FolderTileIcon className="h-9 w-9 shrink-0" />
                   {folder.name}
                 </span>
@@ -117,7 +120,7 @@ export function TrashView() {
                   <button
                     type="button"
                     onClick={() => restoreFolderMutation.mutate(folder.id)}
-                    className="text-sm font-medium text-brand-primary hover:underline"
+                    className="font-label text-label-md text-light-primary hover:underline"
                   >
                     Restaurar
                   </button>
@@ -134,10 +137,10 @@ export function TrashView() {
                 key={file.id}
                 className="file-row flex items-center justify-between"
               >
-                <span className="flex items-center gap-2.5 truncate text-sm font-medium">
-                  <FileTypeIcon name={file.name} mimeType={file.mime_type} className="h-9 w-9 shrink-0 rounded-lg" />
+                <span className="flex min-w-0 items-center gap-3 truncate font-body text-body-md text-light-on-surface">
+                  <FileTypeIcon name={file.name} mimeType={file.mime_type} className="h-9 w-9 shrink-0" />
                   {file.name}
-                  <span className="mono-tag shrink-0 text-[11px] font-normal text-brand-gray">
+                  <span className="mono-tag shrink-0 text-[12px] text-light-on-surface-variant">
                     {formatBytes(file.size_bytes)}
                   </span>
                 </span>
@@ -145,7 +148,7 @@ export function TrashView() {
                   <button
                     type="button"
                     onClick={() => restoreFileMutation.mutate(file.id)}
-                    className="text-sm font-medium text-brand-primary hover:underline"
+                    className="font-label text-label-md text-light-primary hover:underline"
                   >
                     Restaurar
                   </button>

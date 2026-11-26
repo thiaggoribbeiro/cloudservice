@@ -70,22 +70,22 @@ export function ShareDialog({
 
   return (
     <Modal title={`Convidar para "${folder.name}"`} onClose={onClose}>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-gutter-md">
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           {candidates.length === 0 ? (
-            <p className="text-sm text-brand-gray">Nenhum membro disponivel para adicionar.</p>
+            <p className="font-body text-body-sm text-light-on-surface-variant">Nenhum membro disponível para adicionar.</p>
           ) : (
-            <div className="flex max-h-48 flex-col overflow-y-auto rounded-lg border border-brand-border dark:border-white/10">
+            <div className="flex max-h-56 flex-col overflow-y-auto rounded-xl border border-light-outline-variant">
               {candidates.map((u) => (
                 <label
                   key={u.id}
-                  className="flex cursor-pointer items-center gap-2.5 border-b border-brand-border px-3.5 py-2.5 text-sm last:border-b-0 hover:bg-brand-pale/20 dark:border-white/10 dark:hover:bg-white/[0.06]"
+                  className="flex cursor-pointer items-center gap-2.5 border-b border-light-outline-variant px-3.5 py-2.5 font-body text-body-md text-light-on-surface transition-colors duration-state-change last:border-b-0 hover:bg-light-surface-container-low"
                 >
                   <input
                     type="checkbox"
                     checked={selectedIds.has(u.id)}
                     onChange={() => toggleSelected(u.id)}
-                    className="h-4 w-4 shrink-0 accent-brand-primary"
+                    className="h-4 w-4 shrink-0 accent-light-primary"
                   />
                   <span className="truncate">{u.display_name ? `${u.display_name} — ${u.email}` : u.email}</span>
                 </label>
@@ -100,22 +100,22 @@ export function ShareDialog({
             {selectedIds.size > 1 ? `Convidar ${selectedIds.size} membros` : "Convidar"}
           </button>
         </form>
-        {error && <p className="text-sm text-brand-primary">{error}</p>}
+        {error && <p role="alert" className="font-body text-body-sm text-light-error">{error}</p>}
 
         <div className="flex flex-col gap-1.5">
           {shares.length === 0 && (
-            <p className="text-sm text-brand-gray">Ainda nao ha convidados nesta pasta.</p>
+            <p className="font-body text-body-sm text-light-on-surface-variant">Ainda não há convidados nesta pasta.</p>
           )}
           {shares.map((share) => (
             <div
               key={share.id}
-              className="flex items-center justify-between rounded-lg border border-brand-border px-3.5 py-2.5 text-sm dark:border-white/10"
+              className="flex items-center justify-between gap-3 rounded-xl border border-light-outline-variant px-4 py-2.5 font-body text-body-md text-light-on-surface"
             >
               <span className="truncate">{share.profile?.display_name || share.profile?.email}</span>
               <button
                 type="button"
                 onClick={() => revokeMutation.mutate(share.id)}
-                className="shrink-0 text-brand-primary hover:underline"
+                className="shrink-0 rounded-lg px-2 py-1 font-label text-label-md text-light-error transition-colors duration-state-change hover:bg-light-error-container/50"
               >
                 Remover
               </button>

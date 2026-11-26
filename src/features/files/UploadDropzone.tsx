@@ -1,4 +1,5 @@
 import { useState, type DragEvent, type ReactNode } from "react";
+import { UploadIcon } from "../../components/ui/icons";
 
 export function UploadDropzone({
   onUpload,
@@ -36,10 +37,11 @@ export function UploadDropzone({
     >
       {children}
       {isDragging && (
-        <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-white/85 backdrop-blur-sm dark:bg-black/85">
-          <div className="rounded-2xl border-2 border-dashed border-brand-primary bg-brand-pale/50 px-10 py-8 text-center dark:bg-white/5">
-            <p className="text-2xl font-bold text-brand-primary">Solte os arquivos aqui</p>
-            <p className="eyebrow mt-1 text-brand-primary/70">Envio para a pasta atual</p>
+        <div className="animate-fade pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-light-background/85 p-6 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-light-primary bg-light-surface-container-lowest px-10 py-8 text-center shadow-xl">
+            <UploadIcon className="animate-pop h-9 w-9 text-light-primary" />
+            <p className="font-headline text-headline-sm text-light-on-surface">Solte os arquivos aqui</p>
+            <p className="font-body text-body-sm text-light-on-surface-variant">Eles vão para a pasta atual</p>
           </div>
         </div>
       )}

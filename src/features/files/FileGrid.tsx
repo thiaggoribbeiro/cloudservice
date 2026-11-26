@@ -14,7 +14,7 @@ import {
 } from "../favorites/favoritesApi";
 import { useFavoriteIds } from "../favorites/useFavoriteIds";
 import { useDisplayNames } from "../../lib/useDisplayNames";
-import { StarIcon, LockIcon, UnlockIcon, DownloadIcon, FolderTileIcon } from "../../components/ui/icons";
+import { StarIcon, LockIcon, UnlockIcon, DownloadIcon, FolderTileIcon, MoreIcon } from "../../components/ui/icons";
 import { RenameDialog } from "../folders/RenameDialog";
 import { MoveDialog } from "../folders/MoveDialog";
 import { PreviewModal } from "./PreviewModal";
@@ -51,12 +51,12 @@ function RowActionButton({
       disabled={disabled}
       title={title}
       aria-label={title}
-      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors disabled:cursor-default disabled:opacity-40 ${
-        active ? "text-brand-primary" : "text-brand-gray"
+      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors disabled:cursor-default disabled:opacity-40 ${
+        active ? "text-light-primary" : "text-light-on-surface-variant"
       } ${
         disabled
           ? ""
-          : "hover:bg-brand-pale/60 hover:text-brand-black dark:hover:bg-white/10 dark:hover:text-white"
+          : "hover:bg-light-surface-container hover:text-light-on-surface"
       }`}
     >
       {children}
@@ -75,7 +75,7 @@ function FolderSizeCell({ folderId }: { folderId: string }) {
   });
 
   return (
-    <span className="mono-tag hidden w-20 shrink-0 text-right text-[12px] text-brand-gray sm:block">
+    <span className="mono-tag hidden w-20 shrink-0 text-right text-[12px] text-light-on-surface-variant sm:block">
       {data === undefined ? "…" : formatBytes(data)}
     </span>
   );
@@ -102,7 +102,7 @@ function ItemMenu({
   return (
     <div
       data-item-menu
-      className="stagger-0 absolute right-2 top-full z-10 mt-1 w-48 overflow-hidden rounded-lg border border-brand-border bg-white py-1 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.35)] dark:border-white/10 dark:bg-dark-surface"
+      className="menu-surface absolute right-2 top-full z-10 mt-1 w-52"
       onClick={(e) => e.stopPropagation()}
     >
       <button
@@ -111,7 +111,7 @@ function ItemMenu({
           onToggleFavorite();
           onClose();
         }}
-        className="block w-full px-3.5 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
+        className="menu-item"
       >
         {isFavorited ? "Remover dos favoritos" : "Favoritar"}
       </button>
@@ -122,7 +122,7 @@ function ItemMenu({
             onRename();
             onClose();
           }}
-          className="block w-full px-3.5 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
+          className="menu-item"
         >
           Renomear
         </button>
@@ -134,21 +134,21 @@ function ItemMenu({
             onMove();
             onClose();
           }}
-          className="block w-full px-3.5 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
+          className="menu-item"
         >
           Mover
         </button>
       )}
       {onDelete && (
         <>
-          <div className="my-1 border-t border-brand-border dark:border-white/10" />
+          <div className="my-1 border-t border-light-outline-variant" role="separator" />
           <button
             type="button"
             onClick={() => {
               onDelete();
               onClose();
             }}
-            className="block w-full px-3.5 py-2 text-left text-sm text-brand-primary transition-colors hover:bg-brand-pale/50 dark:hover:bg-white/10"
+            className="menu-item menu-item-danger"
           >
             Mover para lixeira
           </button>
@@ -263,12 +263,12 @@ export function FileGrid({
 
   return (
     <>
-      <div className="flex items-center gap-3 px-4 pb-2">
-        <span className="eyebrow flex-1 text-brand-gray">Nome</span>
+      <div className="file-list-head">
+        <span className="flex-1">Nome</span>
         <span className="w-24 shrink-0" />
-        <span className="eyebrow hidden w-32 shrink-0 text-right text-brand-gray lg:block">Modificado por</span>
-        <span className="eyebrow hidden w-28 shrink-0 text-right text-brand-gray sm:block">Modificado</span>
-        <span className="eyebrow hidden w-20 shrink-0 text-right text-brand-gray sm:block">Tamanho</span>
+        <span className="hidden w-32 shrink-0 text-right lg:block">Modificado por</span>
+        <span className="hidden w-28 shrink-0 text-right sm:block">Modificado</span>
+        <span className="hidden w-20 shrink-0 text-right sm:block">Tamanho</span>
         <span className="w-9 shrink-0" />
       </div>
 
@@ -286,7 +286,7 @@ export function FileGrid({
             >
               <FolderTileIcon className="h-9 w-9 shrink-0" />
               <span className="mr-2 flex min-w-0 flex-1 items-center sm:mr-3">
-                <span className="truncate text-sm font-medium text-brand-black dark:text-white">
+                <span className="truncate font-body text-body-md text-light-on-surface">
                   {folder.name}
                 </span>
               </span>
@@ -330,14 +330,14 @@ export function FileGrid({
                   active={isFavorited}
                   title={isFavorited ? "Remover dos favoritos" : "Favoritar"}
                 >
-                  <StarIcon className="h-4 w-4" fill={isFavorited ? "currentColor" : "none"} />
+                  <StarIcon className="h-4 w-4" filled={isFavorited} />
                 </RowActionButton>
               </div>
 
-              <span className="mono-tag hidden w-32 shrink-0 truncate text-right text-[12px] text-brand-gray lg:block">
+              <span className="hidden w-32 shrink-0 truncate text-right font-body text-body-sm text-light-on-surface-variant lg:block">
                 {modifiedByLabel(folder.updated_by)}
               </span>
-              <span className="mono-tag hidden w-28 shrink-0 text-right text-[12px] text-brand-gray sm:block">
+              <span className="mono-tag hidden w-28 shrink-0 text-right text-[12px] text-light-on-surface-variant sm:block">
                 {formatRelativeTime(folder.updated_at)}
               </span>
               <FolderSizeCell folderId={folder.id} />
@@ -349,10 +349,10 @@ export function FileGrid({
                   setOpenMenuId(openMenuId === folder.id ? null : folder.id);
                 }}
                 data-item-menu-trigger
-                className="ml-2 shrink-0 rounded-md px-1.5 py-0.5 text-brand-gray transition-colors hover:bg-brand-pale/60 dark:hover:bg-white/10"
+                className="btn-icon ml-1 h-8 w-8"
                 aria-label="Mais opcoes"
               >
-                ⋮
+                <MoreIcon className="h-5 w-5" />
               </button>
               <ItemMenu
                 onOpen={openMenuId === folder.id}
@@ -398,7 +398,7 @@ export function FileGrid({
             >
               <FileTypeIcon name={file.name} mimeType={file.mime_type} className="h-9 w-9 shrink-0" />
               <span className="mr-2 flex min-w-0 flex-1 items-center sm:mr-3">
-                <span className="truncate text-sm font-medium text-brand-black dark:text-white">
+                <span className="truncate font-body text-body-md text-light-on-surface">
                   {file.name}
                 </span>
               </span>
@@ -421,17 +421,17 @@ export function FileGrid({
                   active={isFavorited}
                   title={isFavorited ? "Remover dos favoritos" : "Favoritar"}
                 >
-                  <StarIcon className="h-4 w-4" fill={isFavorited ? "currentColor" : "none"} />
+                  <StarIcon className="h-4 w-4" filled={isFavorited} />
                 </RowActionButton>
               </div>
 
-              <span className="mono-tag hidden w-32 shrink-0 truncate text-right text-[12px] text-brand-gray lg:block">
+              <span className="hidden w-32 shrink-0 truncate text-right font-body text-body-sm text-light-on-surface-variant lg:block">
                 {modifiedByLabel(file.updated_by)}
               </span>
-              <span className="mono-tag hidden w-28 shrink-0 text-right text-[12px] text-brand-gray sm:block">
+              <span className="mono-tag hidden w-28 shrink-0 text-right text-[12px] text-light-on-surface-variant sm:block">
                 {formatRelativeTime(file.updated_at)}
               </span>
-              <span className="mono-tag hidden w-20 shrink-0 text-right text-[12px] text-brand-gray sm:block">
+              <span className="mono-tag hidden w-20 shrink-0 text-right text-[12px] text-light-on-surface-variant sm:block">
                 {formatBytes(file.size_bytes)}
               </span>
 
@@ -442,10 +442,10 @@ export function FileGrid({
                   setOpenMenuId(openMenuId === file.id ? null : file.id);
                 }}
                 data-item-menu-trigger
-                className="ml-2 shrink-0 rounded-md px-1.5 py-0.5 text-brand-gray transition-colors hover:bg-brand-pale/60 dark:hover:bg-white/10"
+                className="btn-icon ml-1 h-8 w-8"
                 aria-label="Mais opcoes"
               >
-                ⋮
+                <MoreIcon className="h-5 w-5" />
               </button>
               <ItemMenu
                 onOpen={openMenuId === file.id}

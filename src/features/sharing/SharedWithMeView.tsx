@@ -62,9 +62,9 @@ export function SharedWithMeView({
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <Topbar path={[]} onNavigate={() => {}} title="Compartilhado comigo" />
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto px-4 pb-6 sm:px-6">
         {isLoading ? (
-          <p className="eyebrow text-brand-gray">Carregando…</p>
+          <p className="font-body text-body-sm text-light-on-surface-variant">Carregando…</p>
         ) : entries.length === 0 ? (
           <EmptyState
             title="Nada compartilhado com voce ainda"
@@ -72,9 +72,9 @@ export function SharedWithMeView({
           />
         ) : (
           <>
-            <div className="flex items-center gap-3 px-4 pb-2">
-              <span className="eyebrow flex-1 text-brand-gray">Nome</span>
-              <span className="eyebrow hidden w-28 shrink-0 text-right text-brand-gray sm:block">
+            <div className="file-list-head">
+              <span className="flex-1">Nome</span>
+              <span className="hidden w-28 shrink-0 text-right sm:block">
                 Modificado
               </span>
             </div>
@@ -90,10 +90,10 @@ export function SharedWithMeView({
                   className="file-row"
                 >
                   <FolderTileIcon className="h-9 w-9 shrink-0" />
-                  <span className="min-w-0 flex-1 truncate text-sm font-medium text-brand-black dark:text-white">
+                  <span className="min-w-0 flex-1 truncate font-body text-body-md text-light-on-surface">
                     {folder.name}
                   </span>
-                  <span className="mono-tag hidden w-28 shrink-0 text-right text-[12px] text-brand-gray sm:block">
+                  <span className="mono-tag hidden w-28 shrink-0 text-right text-[12px] text-light-on-surface-variant sm:block">
                     {formatRelativeTime(folder.updated_at)}
                   </span>
                 </div>

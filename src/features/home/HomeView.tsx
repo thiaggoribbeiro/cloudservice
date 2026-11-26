@@ -14,6 +14,7 @@ import {
   type FileKindFilter,
 } from "../../lib/format";
 import { FileTypeIcon } from "../../components/ui/FileTypeIcon";
+import { SearchIcon } from "../../components/ui/icons";
 import type { FileRow } from "../../types/domain";
 
 const FILTER_TABS: FileKindFilter[] = ["all", "image", "document", "spreadsheet", "pdf"];
@@ -46,113 +47,122 @@ export function HomeView({ ownerId }: { ownerId: string }) {
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <Topbar path={[]} onNavigate={() => {}} title="Pagina inicial" />
-      <div className="flex-1 overflow-y-auto p-6">
-        {isLoading ? (
-          <p className="eyebrow text-brand-gray">Carregando…</p>
-        ) : files.length === 0 ? (
-          <EmptyState
-            title="Nada por aqui ainda"
-            description="Arquivos que voce enviar ou abrir aparecem aqui, do mais recente ao mais antigo."
+      <div className="flex-1 overflow-y-auto">
+        <div className="mx-auto w-full max-w-[1440px]">
+          <Topbar
+            path={[]}
+            onNavigate={() => {}}
+            title="Página inicial"
+            subtitle="Seus arquivos mais recentes, do último aberto ao mais antigo."
           />
-        ) : (
-          <>
-            <section>
-              <h2 className="mb-3 text-lg font-bold text-brand-black dark:text-white">Para você</h2>
-              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
-                {shelfFiles.map((file) => (
-                  <div
-                    key={file.id}
-                    className="flex flex-col gap-3 rounded-xl border border-brand-border bg-white p-4 transition-colors duration-150 hover:border-brand-secondary dark:border-white/10 dark:bg-white/[0.04]"
-                  >
-                    <div className="flex items-center gap-3">
-                      <FileTypeIcon name={file.name} mimeType={file.mime_type} className="h-14 w-14 shrink-0 rounded-xl" />
-                      <div className="flex min-w-0 flex-col">
-                        <span className="truncate text-sm font-semibold text-brand-black dark:text-white">{file.name}</span>
-                        <span className="mono-tag text-[11px] text-brand-gray">
-                          {formatBytes(file.size_bytes)}
-                        </span>
-                      </div>
-                    </div>
-                    <p className="text-xs text-brand-gray">
-                      Você abriu · {formatRelativeTime(file.last_accessed_at)}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => openFile(file)}
-                      className="btn-ghost mt-auto text-sm"
-                    >
-                      Abrir
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section className="mt-9">
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-lg font-bold text-brand-black dark:text-white">Recente</h2>
-                <div className="flex flex-wrap items-center gap-3">
-                  <div className="flex gap-1 rounded-full border border-brand-border p-1 dark:border-white/15">
-                    {FILTER_TABS.map((tab) => (
+          <div className="px-4 pb-6 sm:px-6">
+            {isLoading ? (
+              <p className="font-body text-body-sm text-light-on-surface-variant">Carregando…</p>
+            ) : files.length === 0 ? (
+              <EmptyState
+                title="Nada por aqui ainda"
+                description="Os arquivos que você enviar ou abrir aparecem aqui, do mais recente ao mais antigo."
+              />
+            ) : (
+              <div className="flex flex-col gap-gutter-lg">
+                <section aria-labelledby="home-for-you">
+                  <h2 id="home-for-you" className="section-title mb-3">
+                    Para você
+                  </h2>
+                  <div className="grid grid-cols-1 gap-gutter-md sm:grid-cols-2 lg:grid-cols-3">
+                    {shelfFiles.map((file, index) => (
                       <button
-                        key={tab}
+                        key={file.id}
                         type="button"
-                        onClick={() => setKindFilter(tab)}
-                        className={`eyebrow rounded-full px-3 py-1.5 transition-colors ${
-                          kindFilter === tab
-                            ? "bg-brand-primary text-white"
-                            : "text-brand-gray hover:text-brand-black dark:hover:text-white"
-                        }`}
+                        onClick={() => openFile(file)}
+                        className="card card-interactive animate-rise flex flex-col gap-3 p-5 text-left hover:-translate-y-0.5"
+                        style={{ animationDelay: `${index * 60}ms` }}
                       >
-                        {FILE_KIND_LABEL[tab]}
+                        <div className="flex items-center gap-3">
+                          <FileTypeIcon name={file.name} mimeType={file.mime_type} className="h-12 w-12 shrink-0" />
+                          <div className="flex min-w-0 flex-col">
+                            <span className="truncate font-label text-label-lg text-light-on-surface">{file.name}</span>
+                            <span className="mono-tag text-[12px] text-light-on-surface-variant">
+                              {formatBytes(file.size_bytes)}
+                            </span>
+                          </div>
+                        </div>
+                        <p className="font-body text-body-sm text-light-on-surface-variant">
+                          Você abriu {formatRelativeTime(file.last_accessed_at)}
+                        </p>
                       </button>
                     ))}
                   </div>
-                  <input
-                    type="text"
-                    value={nameFilter}
-                    onChange={(e) => setNameFilter(e.target.value)}
-                    placeholder="Filtrar por nome…"
-                    className="field-input w-56"
-                  />
-                </div>
-              </div>
+                </section>
 
-              {filteredFiles.length === 0 ? (
-                <p className="text-sm text-brand-gray">Nenhum arquivo encontrado.</p>
-              ) : (
-                <>
-                  <div className="flex items-center gap-3 px-4 pb-2">
-                    <span className="eyebrow flex-1 text-brand-gray">Nome</span>
-                    <span className="eyebrow hidden w-28 shrink-0 text-right text-brand-gray sm:block">
-                      Aberto
-                    </span>
-                    <span className="eyebrow hidden w-20 shrink-0 text-right text-brand-gray sm:block">
-                      Tamanho
-                    </span>
-                  </div>
-                  <div className="file-list">
-                    {filteredFiles.map((file) => (
-                      <div key={file.id} className="file-row" onDoubleClick={() => openFile(file)}>
-                        <FileTypeIcon name={file.name} mimeType={file.mime_type} className="h-9 w-9 shrink-0 rounded-lg" />
-                        <span className="min-w-0 flex-1 truncate text-sm font-medium text-brand-black dark:text-white">
-                          {file.name}
-                        </span>
-                        <span className="mono-tag hidden w-28 shrink-0 text-right text-[12px] text-brand-gray sm:block">
-                          {formatRelativeTime(file.last_accessed_at)}
-                        </span>
-                        <span className="mono-tag hidden w-20 shrink-0 text-right text-[12px] text-brand-gray sm:block">
-                          {formatBytes(file.size_bytes)}
-                        </span>
+                <section aria-labelledby="home-recent">
+                  <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                    <h2 id="home-recent" className="section-title">
+                      Recentes
+                    </h2>
+                    <div className="flex flex-wrap items-center gap-gutter-sm">
+                      <div className="flex flex-wrap gap-gutter-xs" role="group" aria-label="Filtrar por tipo">
+                        {FILTER_TABS.map((tab) => (
+                          <button
+                            key={tab}
+                            type="button"
+                            onClick={() => setKindFilter(tab)}
+                            aria-pressed={kindFilter === tab}
+                            className={`chip ${kindFilter === tab ? "chip-active" : ""}`}
+                          >
+                            {FILE_KIND_LABEL[tab]}
+                          </button>
+                        ))}
                       </div>
-                    ))}
+                      <div className="relative w-full sm:w-56">
+                        <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-light-outline" />
+                        <input
+                          type="search"
+                          value={nameFilter}
+                          onChange={(e) => setNameFilter(e.target.value)}
+                          placeholder="Filtrar por nome…"
+                          aria-label="Filtrar por nome"
+                          className="field-input pl-9"
+                        />
+                      </div>
+                    </div>
                   </div>
-                </>
-              )}
-            </section>
-          </>
-        )}
+
+                  {filteredFiles.length === 0 ? (
+                    <EmptyState
+                      title="Nenhum arquivo encontrado"
+                      description="Tente outro tipo ou outro nome no filtro."
+                    />
+                  ) : (
+                    <>
+                      <div className="file-list-head">
+                        <span className="flex-1">Nome</span>
+                        <span className="hidden w-28 shrink-0 text-right sm:block">Aberto</span>
+                        <span className="hidden w-20 shrink-0 text-right sm:block">Tamanho</span>
+                      </div>
+                      <div className="file-list">
+                        {filteredFiles.map((file) => (
+                          <div key={file.id} className="file-row" onDoubleClick={() => openFile(file)}>
+                            <FileTypeIcon name={file.name} mimeType={file.mime_type} className="h-9 w-9 shrink-0" />
+                            <span className="min-w-0 flex-1 truncate font-body text-body-md text-light-on-surface">
+                              {file.name}
+                            </span>
+                            <span className="mono-tag hidden w-28 shrink-0 text-right text-[12px] text-light-on-surface-variant sm:block">
+                              {formatRelativeTime(file.last_accessed_at)}
+                            </span>
+                            <span className="mono-tag hidden w-20 shrink-0 text-right text-[12px] text-light-on-surface-variant sm:block">
+                              {formatBytes(file.size_bytes)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </section>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {preview && <PreviewModal file={preview} onClose={() => setPreview(null)} />}

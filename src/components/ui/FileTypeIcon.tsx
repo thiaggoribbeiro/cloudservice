@@ -41,7 +41,7 @@ export function FileTypeIcon({
           fontSize={ext.length > 3 ? "7" : "8.5"}
           fontWeight="700"
           fill="#ffffff"
-          fontFamily="Archivo, sans-serif"
+          fontFamily="Lato, sans-serif"
         >
           {ext}
         </text>

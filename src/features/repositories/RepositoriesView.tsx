@@ -18,7 +18,7 @@ import {
   type RepositoryWithRoot,
 } from "./repositoryApi";
 import { formatBytes } from "../../lib/format";
-import { RepositoryIcon } from "../../components/ui/icons";
+import { RepositoryIcon, MoreIcon, PlusIcon } from "../../components/ui/icons";
 import type { CreateActionTarget, Folder, UserRole } from "../../types/domain";
 
 const GIB = 1073741824;
@@ -73,15 +73,15 @@ function RepositoryRow({
   }
 
   return (
-    <div className="flex min-w-0 flex-col gap-3 rounded-lg border border-brand-border p-4 dark:border-white/10">
+    <div className="card flex min-w-0 flex-col gap-3 p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <button
           type="button"
           onClick={onOpen}
-          className="flex min-w-0 items-center gap-2.5 text-left hover:text-brand-primary"
+          className="flex min-w-0 items-center gap-2.5 text-left hover:text-light-primary"
         >
-          <RepositoryIcon className="h-5 w-5 shrink-0 text-brand-primary" />
-          <span className="truncate text-sm font-semibold text-brand-black dark:text-white">
+          <RepositoryIcon className="h-5 w-5 shrink-0 text-light-primary" />
+          <span className="truncate font-label text-label-lg text-light-on-surface">
             {repository.name}
           </span>
         </button>
@@ -91,7 +91,7 @@ function RepositoryRow({
             type="button"
             onClick={onInvite}
             disabled={!hasRootFolder}
-            className="btn-ghost shrink-0 px-3 py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-45"
+            className="btn-ghost shrink-0 px-3 py-1.5"
             title={hasRootFolder ? undefined : "Pasta raiz indisponivel"}
           >
             Convidar
@@ -106,30 +106,30 @@ function RepositoryRow({
                 onToggleMenu();
               }}
               disabled={!hasRootFolder}
-              className="flex h-8 w-8 items-center justify-center rounded-md text-lg leading-none text-brand-gray transition-colors hover:bg-brand-pale/60 hover:text-brand-black disabled:cursor-not-allowed disabled:opacity-45 dark:hover:bg-white/10 dark:hover:text-white"
+              className="btn-icon h-8 w-8 disabled:cursor-not-allowed disabled:opacity-45"
               aria-label="Mais opcoes do repositorio"
               title="Mais opcoes"
             >
-              ⋮
+              <MoreIcon className="h-5 w-5" />
             </button>
 
             {menuOpen && (
               <div
                 data-item-menu
-                className="stagger-0 absolute right-0 top-full z-20 mt-1 w-44 overflow-hidden rounded-lg border border-brand-border bg-white py-1 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.35)] dark:border-white/10 dark:bg-dark-surface"
+                className="menu-surface absolute right-0 top-full z-20 mt-1 w-48"
               >
                 <button
                   type="button"
                   onClick={onRename}
-                  className="block w-full px-3.5 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/50 dark:text-white dark:hover:bg-white/10"
+                  className="menu-item"
                 >
                   Renomear
                 </button>
-                <div className="my-1 border-t border-brand-border dark:border-white/10" />
+                <div className="my-1 border-t border-light-outline-variant" role="separator" />
                 <button
                   type="button"
                   onClick={onDelete}
-                  className="block w-full px-3.5 py-2 text-left text-sm text-brand-primary transition-colors hover:bg-brand-pale/50 dark:hover:bg-white/10"
+                  className="menu-item menu-item-danger"
                 >
                   Excluir
                 </button>
@@ -140,21 +140,21 @@ function RepositoryRow({
       </div>
 
       <div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/10 dark:bg-white/15">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-light-surface-container-high">
           <div
-            className="h-full rounded-full bg-brand-primary transition-[width] duration-500"
+            className="h-full rounded-full bg-light-primary transition-[width] duration-500"
             style={{ width: `${percent}%` }}
           />
         </div>
         {usage && (
-          <p className="mono-tag mt-1.5 text-[11px] text-brand-gray">
+          <p className="mt-1.5 font-body text-body-sm tabular-nums text-light-on-surface-variant">
             {formatBytes(usage.used_bytes)} / {formatBytes(usage.quota_bytes)}
           </p>
         )}
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <label htmlFor={`quota-${repository.id}`} className="eyebrow text-brand-gray">
+        <label htmlFor={`quota-${repository.id}`} className="font-label text-label-md text-light-on-surface-variant">
           Cota (GB)
         </label>
         <input
@@ -165,14 +165,14 @@ function RepositoryRow({
           step={0.5}
           value={quotaInput}
           onChange={(e) => setQuotaInput(e.target.value)}
-          className="field-input w-24 py-1.5 text-sm"
+          className="field-input w-24 py-1.5"
         />
         {quotaChanged && (
           <button
             type="button"
             onClick={saveQuota}
             disabled={quotaMutation.isPending}
-            className="btn-primary px-3 py-1.5 text-sm"
+            className="btn-primary px-3 py-1.5"
           >
             Salvar
           </button>
@@ -286,32 +286,34 @@ export function RepositoriesView({
 
   return (
     <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-      <Topbar path={[]} onNavigate={() => {}} title="Repositórios" />
+      <Topbar
+        path={[]}
+        onNavigate={() => {}}
+        title="Repositórios"
+        subtitle={`${repositories.length} ${repositories.length === 1 ? "repositório" : "repositórios"}`}
+        actions={
+          <button type="button" onClick={() => setShowCreate(true)} className="btn-primary">
+            <PlusIcon className="h-[18px] w-[18px]" />
+            Novo repositório
+          </button>
+        }
+      />
 
-      <div className="flex flex-col gap-3 border-b border-brand-border px-4 py-3 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-        <p className="mono-tag text-xs text-brand-gray">
-          {repositories.length} {repositories.length === 1 ? "repositorio" : "repositorios"}
-        </p>
-        <button type="button" onClick={() => setShowCreate(true)} className="btn-primary w-full text-sm sm:w-auto">
-          + Novo repositorio
-        </button>
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+      <div className="flex-1 overflow-y-auto px-4 pb-6 sm:px-6">
         {openError && (
-          <div className="mb-4 rounded-lg border border-brand-primary/25 bg-brand-primary/10 px-4 py-3 text-sm text-brand-black dark:text-white">
+          <div role="alert" className="mb-4 rounded-xl bg-light-error-container px-4 py-3 font-body text-body-sm text-light-on-error-container">
             {openError}
           </div>
         )}
         {isLoading ? (
-          <p className="eyebrow text-brand-gray">Carregando…</p>
+          <p className="font-body text-body-sm text-light-on-surface-variant">Carregando…</p>
         ) : repositories.length === 0 ? (
           <EmptyState
-            title="Nenhum repositorio ainda"
-            description="Crie um repositorio para compartilhar um espaco com cota propria entre varios membros."
+            title="Nenhum repositório ainda"
+            description="Crie um repositório para compartilhar um espaço com cota própria entre vários membros."
           />
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-1 gap-gutter-md xl:grid-cols-2">
             {repositories.map((repository) => (
               <RepositoryRow
                 key={repository.id}
@@ -363,7 +365,7 @@ export function RepositoriesView({
 
       {repositoryDialog?.kind === "delete" && (
         <ConfirmDialog
-          title="Excluir repositorio"
+          title="Excluir repositório"
           message={`O repositorio "${repositoryDialog.repository.name}" e todo o seu conteudo serao movidos para a lixeira.`}
           confirmLabel={deleteRepositoryMutation.isPending ? "Excluindo..." : "Excluir"}
           onConfirm={() => deleteRepositoryMutation.mutate(repositoryDialog.repository)}

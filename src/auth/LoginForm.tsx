@@ -15,7 +15,7 @@ export function LoginForm() {
     if (AVESTAID_ENABLED && !avestaId.hasCallbackCode()) avestaId.ensureSession();
   }, []);
 
-  if (AVESTAID_ENABLED) return <div className="min-h-screen bg-white" />;
+  if (AVESTAID_ENABLED) return <div className="min-h-screen bg-light-background" />;
 
   return <LocalLoginForm />;
 }
@@ -46,76 +46,70 @@ function LocalLoginForm() {
   }
 
   return (
-    <div className="force-light bg-grain relative flex min-h-screen items-center justify-center overflow-hidden bg-white p-6">
-      {/* Ambient wash anchoring the composition to the brand's warmth without tipping into a flat cream canvas */}
-      <div
-        aria-hidden
-        className="wash-pale pointer-events-none absolute -right-40 -top-40 h-[32rem] w-[32rem] rounded-full opacity-70 blur-3xl"
-      />
-      <div
-        aria-hidden
-        className="wash-secondary pointer-events-none absolute -bottom-48 -left-32 h-[28rem] w-[28rem] rounded-full opacity-60 blur-3xl"
-      />
+    <div className="force-light flex min-h-screen flex-col items-center justify-center bg-light-background px-4 py-10">
+      <div className="w-full max-w-[400px]">
+        <div className="stagger-0 card overflow-hidden">
+          <div className="h-1 bg-light-primary" aria-hidden="true" />
+          <div className="p-8 sm:p-10">
+            <div className="flex justify-center pb-6">
+              <img src="/logo-login.png" alt="Cloud Service - Avesta" className="h-32 w-auto" />
+            </div>
 
-      <div className="relative w-full max-w-md">
-        <div className="stagger-1 relative rounded-2xl border border-brand-border bg-white p-10 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.25)]">
-          <div className="stagger-0 flex justify-center pb-8">
-            <img src="/logo-login.png" alt="Cloud Service - Avesta" className="h-44 w-auto" />
-          </div>
+            <h1 className="text-center font-headline text-headline-md text-light-on-surface">Entrar na nuvem</h1>
+            <p className="mt-1 text-center font-body text-body-sm text-light-on-surface-variant">
+              Seus arquivos, pastas e compartilhamentos num só lugar.
+            </p>
 
-          <h1 className="text-center text-lg font-semibold leading-none text-brand-black/70">
-            Entrar na nuvem
-          </h1>
-          <p className="mt-2 text-center text-sm text-brand-gray">
-            Seus arquivos, pastas e compartilhamentos, organizados num só lugar.
-          </p>
+            <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-gutter-md">
+              <div className="stagger-1 flex flex-col">
+                <label htmlFor="email" className="field-label">
+                  E-mail
+                </label>
+                <div className="relative">
+                  <MailIcon className="field-pill-icon h-[18px] w-[18px]" />
+                  <input
+                    id="email"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="field-pill"
+                    placeholder="voce@empresa.com.br"
+                  />
+                </div>
+              </div>
 
-          <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-6">
-            <div className="stagger-2 flex flex-col gap-1">
-              <label htmlFor="email" className="eyebrow text-brand-gray">
-                E-mail
-              </label>
-              <div className="relative">
-                <MailIcon className="field-pill-icon" />
-                <input
-                  id="email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="field-pill"
-                  placeholder="voce@empresa.com.br"
+              <div className="stagger-2">
+                <PasswordField
+                  id="password"
+                  label="Senha"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
-            </div>
 
-            <div className="stagger-3">
-              <PasswordField
-                id="password"
-                label="Senha"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
+              {error && (
+                <p
+                  role="alert"
+                  className="rounded-lg bg-light-error-container px-3 py-2 font-body text-body-sm text-light-on-error-container"
+                >
+                  {error}
+                </p>
+              )}
 
-            {error && (
-              <p role="alert" className="text-sm text-brand-primary">
-                {error}
-              </p>
-            )}
-
-            <button type="submit" disabled={submitting} className="btn-primary stagger-4 w-full py-3">
-              {submitting ? "Entrando…" : "Entrar"}
-            </button>
-          </form>
+              <button type="submit" disabled={submitting} className="btn-primary stagger-3 mt-2 w-full py-2.5">
+                {submitting ? "Entrando…" : "Entrar"}
+              </button>
+            </form>
+          </div>
         </div>
 
-        <p className="mono-tag stagger-5 mt-5 text-center text-[11px] uppercase tracking-widest text-brand-gray">
-          Acesso restrito · somente por convite
+        <p className="stagger-4 mt-5 text-center font-body text-body-sm text-light-on-surface-variant">
+          Acesso restrito, somente por convite
         </p>
-        <p className="mono-tag stagger-5 mt-1 text-center text-[11px] uppercase tracking-widest text-brand-gray/60">
+        <p className="stagger-4 mt-1 text-center font-body text-[11px] leading-4 text-light-outline">
           Versão {APP_VERSION}
         </p>
       </div>

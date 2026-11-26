@@ -30,6 +30,7 @@ function App() {
   const [repositoriesResetKey, setRepositoriesResetKey] = useState(0);
   const [sharedResetKey, setSharedResetKey] = useState(0);
   const [favoritesResetKey, setFavoritesResetKey] = useState(0);
+  const [navOpen, setNavOpen] = useState(false);
   const lastUserId = useRef<string | null | undefined>(undefined);
 
   const isGuest = profile?.role === "guest";
@@ -56,8 +57,8 @@ function App() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white dark:bg-black">
-        <p className="eyebrow text-brand-gray">Carregando…</p>
+      <div className="flex min-h-screen items-center justify-center bg-light-background">
+        <p className="font-body text-body-sm text-light-on-surface-variant">Carregando…</p>
       </div>
     );
   }
@@ -88,16 +89,11 @@ function App() {
   }
 
   return (
-    <div className="flex h-screen min-w-0 flex-col overflow-hidden">
-      <GlobalTopbar
-        userEmail={session.user.email}
-        profile={profile}
-        onNavigateFolder={handleNavigateFolder}
-        onGoHome={handleGoHome}
-      />
-
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden md:flex-row md:gap-3 lg:gap-6">
+    <div className="flex h-screen min-w-0 overflow-hidden bg-light-background">
         <Sidebar
+          open={navOpen}
+          onClose={() => setNavOpen(false)}
+          onGoHome={handleGoHome}
           view={view}
           path={path}
           userId={session.user.id}
@@ -123,6 +119,17 @@ function App() {
           }}
           onSelectEventLog={() => setView({ kind: "eventLog" })}
         />
+
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <GlobalTopbar
+          userEmail={session.user.email}
+          profile={profile}
+          onNavigateFolder={handleNavigateFolder}
+          onGoHome={handleGoHome}
+          onOpenNav={() => setNavOpen(true)}
+        />
+
+        <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
 
         {view.kind === "home" && <HomeView ownerId={session.user.id} />}
 
@@ -171,6 +178,7 @@ function App() {
         {view.kind === "eventLog" && (profile?.role === "admin" || profile?.role === "manager") && (
           <EventLogView onNavigateFolder={handleNavigateFolder} />
         )}
+        </main>
       </div>
     </div>
   );

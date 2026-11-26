@@ -27,9 +27,9 @@ export function PreviewModal({ file, onClose }: { file: FileRow; onClose: () => 
 
   return (
     <Modal title={file.name} onClose={onClose} size="large">
-      <div className="flex h-[85vh] min-h-[200px] items-center justify-center overflow-auto rounded-lg bg-brand-pale/25 dark:bg-white/5">
-        {error && <p className="text-sm text-brand-primary">Nao foi possivel carregar a pre-visualizacao.</p>}
-        {!error && !url && <p className="text-brand-gray">Carregando...</p>}
+      <div className="flex h-[85vh] min-h-[200px] items-center justify-center overflow-auto rounded-xl bg-light-surface-container-low">
+        {error && <p role="alert" className="font-body text-body-sm text-light-error">Não foi possível carregar a pré-visualização.</p>}
+        {!error && !url && <p className="font-body text-body-sm text-light-on-surface-variant">Carregando…</p>}
         {!error && url && isImage && (
           <img src={url} alt={file.name} className="max-h-full max-w-full object-contain" />
         )}
@@ -38,7 +38,7 @@ export function PreviewModal({ file, onClose }: { file: FileRow; onClose: () => 
         )}
         {!error && url && !isImage && !isPdf && (
           <div className="flex flex-col items-center gap-3 py-8 text-center">
-            <p className="text-brand-gray">Pre-visualizacao nao disponivel para este tipo de arquivo.</p>
+            <p className="font-body text-body-md text-light-on-surface-variant">Pré-visualização não disponível para este tipo de arquivo.</p>
             <button type="button" onClick={() => downloadFile(file)} className="btn-primary">
               Baixar
             </button>

@@ -56,15 +56,15 @@ function UploadLocation({
 
   return (
     <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
-      <span className="truncate text-xs text-brand-gray">{metadata.folder_path}</span>
+      <span className="mono-tag truncate text-[12px] text-light-on-surface-variant">{metadata.folder_path}</span>
       {state === "not-found" ? (
-        <span className="text-xs text-brand-gray">Pasta nao encontrada - pode ter sido excluida</span>
+        <span className="font-body text-body-sm text-light-on-surface-variant">Pasta nao encontrada - pode ter sido excluida</span>
       ) : (
         <button
           type="button"
           onClick={handleLocate}
           disabled={state === "locating"}
-          className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-brand-primary transition-colors hover:underline disabled:opacity-60"
+          className="inline-flex shrink-0 items-center gap-1 rounded font-label text-label-sm text-light-primary transition-colors hover:underline disabled:opacity-60"
         >
           <LocateIcon className="h-3.5 w-3.5" />
           {state === "locating" ? "Abrindo…" : "Ver local do arquivo"}
@@ -109,14 +109,14 @@ export function EventLogView({ onNavigateFolder }: { onNavigateFolder: (path: Fo
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <Topbar path={[]} onNavigate={() => {}} title="Log de Eventos" />
+      <Topbar path={[]} onNavigate={() => {}} title="Log de eventos" subtitle="Quem fez o quê, e quando, em todo o Cloud Service." />
 
-      <div className="flex flex-wrap items-center gap-3 border-b border-brand-border px-6 py-3 dark:border-white/10">
+      <div className="flex flex-wrap items-center gap-gutter-sm px-4 pb-4 sm:px-6">
         <select
           aria-label="Filtrar por categoria"
           value={category}
           onChange={(e) => applyFilters({ category: e.target.value as EventTargetType | "all" })}
-          className="field-input w-auto py-1.5 text-sm"
+          className="field-input w-auto"
         >
           <option value="all">Todas as categorias</option>
           {CATEGORY_FILTERS.filter((c) => c !== "all").map((c) => (
@@ -131,13 +131,13 @@ export function EventLogView({ onNavigateFolder }: { onNavigateFolder: (path: Fo
           value={search}
           onChange={(e) => applyFilters({ search: e.target.value })}
           placeholder="Buscar por e-mail…"
-          className="field-input w-auto min-w-[220px] py-1.5 text-sm"
+          className="field-input w-full sm:w-auto sm:min-w-[260px]"
         />
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto px-4 pb-6 sm:px-6">
         {isLoading && offset === 0 ? (
-          <p className="eyebrow text-brand-gray">Carregando…</p>
+          <p className="font-body text-body-sm text-light-on-surface-variant">Carregando…</p>
         ) : visibleRows.length === 0 ? (
           <EmptyState
             title="Nenhum evento registrado"
@@ -145,30 +145,30 @@ export function EventLogView({ onNavigateFolder }: { onNavigateFolder: (path: Fo
           />
         ) : (
           <>
-            <div className="flex items-center gap-3 px-4 pb-2">
-              <span className="eyebrow w-56 shrink-0 text-brand-gray">Usuario</span>
-              <span className="eyebrow flex-1 text-brand-gray">Acao</span>
-              <span className="eyebrow hidden w-40 shrink-0 text-right text-brand-gray sm:block">Quando</span>
+            <div className="file-list-head">
+              <span className="w-56 shrink-0">Usuário</span>
+              <span className="flex-1">Ação</span>
+              <span className="hidden w-40 shrink-0 text-right sm:block">Quando</span>
             </div>
             <div className="file-list">
               {visibleRows.map((row) => (
                 <div key={row.id} className="file-row">
                   <div className="flex w-56 shrink-0 flex-col">
-                    <span className="truncate text-sm font-medium text-brand-black dark:text-white">
+                    <span className="truncate font-body text-body-md text-light-on-surface">
                       {row.user_email}
                     </span>
-                    <span className="eyebrow text-[11px] text-brand-primary">{ROLE_LABEL[row.user_role]}</span>
+                    <span className="font-label text-label-sm text-light-on-surface-variant">{ROLE_LABEL[row.user_role]}</span>
                   </div>
                   <span className="flex min-w-0 flex-1 flex-col justify-center">
-                    <span className="truncate text-sm text-brand-black dark:text-white">
+                    <span className="truncate text-sm text-light-on-surface">
                       {EVENT_ACTION_LABEL[row.action] ?? row.action}
-                      {row.target_name && <span className="text-brand-gray"> "{row.target_name}"</span>}
+                      {row.target_name && <span className="text-light-on-surface-variant"> "{row.target_name}"</span>}
                     </span>
                     {row.action === "upload_arquivo" && isUploadMetadata(row.metadata) && (
                       <UploadLocation metadata={row.metadata} onNavigateFolder={onNavigateFolder} />
                     )}
                   </span>
-                  <span className="mono-tag hidden w-40 shrink-0 text-right text-[12px] text-brand-gray sm:block">
+                  <span className="mono-tag hidden w-40 shrink-0 text-right text-[12px] text-light-on-surface-variant sm:block">
                     {formatRelativeTime(row.created_at)}
                   </span>
                 </div>
@@ -177,7 +177,7 @@ export function EventLogView({ onNavigateFolder }: { onNavigateFolder: (path: Fo
 
             {data?.hasMore && (
               <div className="flex justify-center pt-4">
-                <button type="button" onClick={loadMore} disabled={isFetching} className="btn-ghost px-4 py-2 text-sm">
+                <button type="button" onClick={loadMore} disabled={isFetching} className="btn-ghost">
                   {isFetching ? "Carregando…" : "Carregar mais"}
                 </button>
               </div>

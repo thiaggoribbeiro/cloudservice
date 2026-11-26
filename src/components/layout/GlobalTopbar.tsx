@@ -10,7 +10,7 @@ import { getFolderPath } from "../../features/folders/folderApi";
 import { downloadFile } from "../../features/files/fileApi";
 import { PreviewModal } from "../../features/files/PreviewModal";
 import { useTheme } from "../../lib/useTheme";
-import { SearchIcon, FolderIcon, SunIcon, MoonIcon } from "../ui/icons";
+import { SearchIcon, FolderIcon, SunIcon, MoonIcon, MenuIcon, ChevronDownIcon, LogoutIcon } from "../ui/icons";
 import { logEvent } from "../../features/eventLog/eventLogApi";
 import type { FileRow, Folder, Profile } from "../../types/domain";
 import * as avestaId from "../../lib/avestaId";
@@ -22,11 +22,13 @@ export function GlobalTopbar({
   profile,
   onNavigateFolder,
   onGoHome,
+  onOpenNav,
 }: {
   userEmail: string | undefined;
   profile: Profile | null;
   onNavigateFolder: (path: Folder[]) => void;
   onGoHome: () => void;
+  onOpenNav: () => void;
 }) {
   const { theme, toggleTheme } = useTheme();
   const [query, setQuery] = useState("");
@@ -74,147 +76,185 @@ export function GlobalTopbar({
 
   const hasQuery = debounced.length >= 2;
   const hasResults = !!results && (results.folders.length > 0 || results.files.length > 0);
+  const displayName = profile?.display_name || userEmail;
+  const initials = getInitials(profile?.display_name, userEmail);
 
   return (
-    <header className="flex min-h-14 shrink-0 flex-wrap items-center gap-3 bg-white px-3 py-2 dark:bg-dark-surface sm:flex-nowrap sm:gap-4 sm:px-4 lg:gap-6 lg:px-6">
+    <header className="flex min-h-16 shrink-0 flex-wrap items-center gap-gutter-sm border-b border-light-outline-variant bg-light-surface-container-lowest px-4 py-2.5 sm:flex-nowrap lg:gap-gutter-md lg:px-6">
+      <button type="button" onClick={onOpenNav} className="btn-icon -ml-1 lg:hidden" aria-label="Abrir menu">
+        <MenuIcon className="h-5 w-5" />
+      </button>
+
       <button
         type="button"
         onClick={onGoHome}
-        className="shrink-0 rounded-md transition-opacity hover:opacity-80"
-        aria-label="Ir para a pagina inicial"
-        title="Pagina inicial"
+        className="shrink-0 rounded-lg transition-opacity duration-state-change hover:opacity-80 lg:hidden"
+        aria-label="Ir para a página inicial"
       >
         <img
           src={theme === "dark" ? "/logo-dark.png" : "/logo-claro.png"}
           alt="Cloud Service - Avesta"
-          className="h-10 w-auto sm:h-12"
+          className="h-8 w-auto"
         />
       </button>
 
-      <div ref={searchRef} className="relative order-3 flex w-full justify-center sm:order-none sm:w-auto sm:flex-1">
-        <div className="w-full max-w-md">
-          <div className="relative">
-            <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-gray dark:text-white/60" />
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setSearchOpen(true);
-              }}
-              onFocus={() => setSearchOpen(true)}
-              placeholder="Buscar arquivos e pastas…"
-              className="w-full rounded-full border border-black/0 bg-black/5 py-2 pl-9 pr-4 text-sm text-brand-black placeholder-brand-gray outline-none transition-colors duration-150 focus:bg-white dark:bg-white/10 dark:text-white dark:placeholder-white/50 dark:focus:bg-dark-canvas"
-            />
+      <div ref={searchRef} className="relative order-3 w-full sm:order-none sm:w-auto sm:max-w-md sm:flex-1">
+        <label htmlFor="global-search" className="sr-only">
+          Buscar arquivos e pastas
+        </label>
+        <div className="relative">
+          <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-light-outline" />
+          <input
+            id="global-search"
+            type="search"
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setSearchOpen(true);
+            }}
+            onFocus={() => setSearchOpen(true)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setSearchOpen(false);
+            }}
+            placeholder="Buscar arquivos e pastas…"
+            className="field-input pl-9"
+          />
+        </div>
+
+        {searchOpen && hasQuery && (
+          <div className="menu-surface absolute left-0 right-0 top-full z-30 mt-2 max-h-96 overflow-y-auto py-1.5">
+            {isFetching && (
+              <p className="px-4 py-3 font-body text-body-sm text-light-on-surface-variant">Buscando…</p>
+            )}
+
+            {!isFetching && !hasResults && (
+              <p className="px-4 py-3 font-body text-body-sm text-light-on-surface-variant">
+                Nenhum resultado para “{debounced}”.
+              </p>
+            )}
+
+            {!isFetching && results && results.folders.length > 0 && (
+              <div className="pb-1">
+                <p className="px-4 pb-1 pt-2 font-label text-label-sm text-light-on-surface-variant">Pastas</p>
+                {results.folders.map((folder) => (
+                  <button
+                    key={folder.id}
+                    type="button"
+                    onClick={() => handleFolderResult(folder)}
+                    className="menu-item px-4"
+                  >
+                    <FolderIcon className="h-[18px] w-[18px] text-light-primary" />
+                    <span className="truncate">{folder.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {!isFetching && results && results.files.length > 0 && (
+              <div>
+                <p className="px-4 pb-1 pt-2 font-label text-label-sm text-light-on-surface-variant">Arquivos</p>
+                {results.files.map((file) => (
+                  <button
+                    key={file.id}
+                    type="button"
+                    onClick={() => handleFileResult(file)}
+                    className="menu-item px-4"
+                  >
+                    <FileTypeIcon name={file.name} mimeType={file.mime_type} className="h-5 w-5 shrink-0" />
+                    <span className="truncate">{file.name}</span>
+                    <span className="mono-tag ml-auto shrink-0 text-[12px] text-light-on-surface-variant">
+                      {formatBytes(file.size_bytes)}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
+        )}
+      </div>
 
-          {searchOpen && hasQuery && (
-            <div className="absolute left-0 right-0 top-full z-30 mt-2 max-h-96 overflow-y-auto rounded-lg border border-brand-border bg-white py-1.5 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.35)] dark:border-white/10 dark:bg-dark-surface">
-              {isFetching && <p className="px-4 py-3 text-sm text-brand-gray">Buscando…</p>}
+      <div className="ml-auto flex shrink-0 items-center gap-gutter-md">
+        <button
+          type="button"
+          role="switch"
+          aria-checked={theme === "dark"}
+          onClick={toggleTheme}
+          aria-label="Tema escuro"
+          title={theme === "dark" ? "Usar tema claro" : "Usar tema escuro"}
+          className="relative inline-flex h-[22px] w-10 shrink-0 items-center rounded-full border border-light-outline-variant bg-light-surface-container-high"
+        >
+          <SunIcon className="pointer-events-none absolute left-[4px] h-3 w-3 text-light-on-surface-variant" />
+          <MoonIcon className="pointer-events-none absolute right-[4px] h-3 w-3 text-light-on-surface-variant" />
+          <span
+            className={`relative z-10 ml-[2px] h-4 w-4 rounded-full bg-light-surface-container-lowest shadow-sm transition-transform duration-surface-enter ease-surface-enter ${
+              theme === "dark" ? "translate-x-[18px]" : "translate-x-0"
+            }`}
+          />
+        </button>
 
-              {!isFetching && !hasResults && (
-                <p className="px-4 py-3 text-sm text-brand-gray">Nenhum resultado para “{debounced}”.</p>
+        <div ref={profileRef} className="relative">
+          <button
+            type="button"
+            onClick={() => setProfileOpen((o) => !o)}
+            aria-expanded={profileOpen}
+            aria-haspopup="menu"
+            aria-label="Conta"
+            className="flex items-center gap-2 rounded-lg py-1 pl-1 pr-1 transition-colors duration-state-change hover:bg-light-surface-container md:pr-2"
+          >
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-light-surface-container font-label text-label-md text-light-primary">
+              {initials}
+            </span>
+            <span className="hidden max-w-[12rem] flex-col text-left md:flex">
+              <span className="truncate font-label text-label-md text-light-on-surface">{displayName}</span>
+              {profile && (
+                <span className="truncate font-body text-[11px] leading-4 text-light-on-surface-variant">
+                  {ROLE_LABEL[profile.role]}
+                </span>
               )}
+            </span>
+            <ChevronDownIcon className="hidden h-[18px] w-[18px] text-light-on-surface-variant md:inline-flex" />
+          </button>
 
-              {!isFetching && results && results.folders.length > 0 && (
-                <div className="pb-1">
-                  <p className="eyebrow px-4 pb-1 pt-2 text-brand-gray">Pastas</p>
-                  {results.folders.map((folder) => (
-                    <button
-                      key={folder.id}
-                      type="button"
-                      onClick={() => handleFolderResult(folder)}
-                      className="flex w-full items-center gap-2.5 px-4 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/40 dark:text-white dark:hover:bg-white/10"
-                    >
-                      <FolderIcon className="h-4 w-4 shrink-0 text-brand-primary" />
-                      <span className="truncate">{folder.name}</span>
-                    </button>
-                  ))}
+          {profileOpen && (
+            <div role="menu" className="menu-surface absolute right-0 top-full z-30 mt-2 w-[min(18rem,calc(100vw-2rem))] py-0">
+              <div className="flex items-center gap-3 p-4">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-light-surface-container font-headline text-headline-sm text-light-primary">
+                  {initials}
+                </span>
+                <div className="flex min-w-0 flex-col">
+                  <span className="truncate font-label text-label-lg text-light-on-surface">{displayName}</span>
+                  <span className="truncate font-body text-body-sm text-light-on-surface-variant">{userEmail}</span>
+                </div>
+              </div>
+
+              {profile && (
+                <div className="px-4 pb-3">
+                  <span className="badge badge-primary">{ROLE_LABEL[profile.role]}</span>
                 </div>
               )}
 
-              {!isFetching && results && results.files.length > 0 && (
-                <div>
-                  <p className="eyebrow px-4 pb-1 pt-2 text-brand-gray">Arquivos</p>
-                  {results.files.map((file) => (
-                    <button
-                      key={file.id}
-                      type="button"
-                      onClick={() => handleFileResult(file)}
-                      className="flex w-full items-center gap-2.5 px-4 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-pale/40 dark:text-white dark:hover:bg-white/10"
-                    >
-                      <FileTypeIcon name={file.name} mimeType={file.mime_type} className="h-5 w-5 shrink-0" />
-                      <span className="truncate">{file.name}</span>
-                      <span className="mono-tag ml-auto shrink-0 text-[11px] text-brand-gray">
-                        {formatBytes(file.size_bytes)}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
+              <div className="border-t border-light-outline-variant py-1">
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={async () => {
+                    await logEvent("logout", "sessao", userEmail);
+                    if (AVESTAID_ENABLED) {
+                      await avestaId.signOut();
+                      window.location.href = "/"; // re-boot: AuthProvider will redirect to the AvestaID portal
+                      return;
+                    }
+                    supabase.auth.signOut();
+                  }}
+                  className="menu-item px-4"
+                >
+                  <LogoutIcon className="h-[18px] w-[18px] text-light-on-surface-variant" />
+                  Sair
+                </button>
+              </div>
             </div>
           )}
         </div>
-      </div>
-
-      <button
-        type="button"
-        onClick={toggleTheme}
-        aria-label={theme === "dark" ? "Usar tema claro" : "Usar tema escuro"}
-        title={theme === "dark" ? "Usar tema claro" : "Usar tema escuro"}
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-brand-gray transition-colors hover:bg-black/5 hover:text-brand-black dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white"
-      >
-        {theme === "dark" ? <SunIcon className="h-[18px] w-[18px]" /> : <MoonIcon className="h-[18px] w-[18px]" />}
-      </button>
-
-      <div ref={profileRef} className="relative shrink-0">
-        <button
-          type="button"
-          onClick={() => setProfileOpen((o) => !o)}
-          className="mono-tag block max-w-[10rem] truncate rounded-md px-2 py-1.5 text-sm text-brand-black/80 transition-colors hover:bg-black/5 hover:text-brand-black dark:text-white/90 dark:hover:bg-white/10 dark:hover:text-white sm:max-w-[14rem] lg:max-w-none"
-        >
-          {userEmail}
-        </button>
-
-        {profileOpen && (
-          <div className="absolute right-0 top-full z-30 mt-2 w-[min(18rem,calc(100vw-1.5rem))] rounded-lg border border-brand-border bg-white p-5 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.35)] dark:border-white/10 dark:bg-dark-surface">
-            <div className="flex items-center gap-3">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-primary text-base font-bold text-white">
-                {getInitials(profile?.display_name, userEmail)}
-              </span>
-              <div className="flex min-w-0 flex-col">
-                <span className="truncate text-sm font-semibold text-brand-black dark:text-white">
-                  {profile?.display_name || userEmail}
-                </span>
-                <span className="mono-tag truncate text-[11px] text-brand-gray">{userEmail}</span>
-              </div>
-            </div>
-
-            {profile && (
-              <span className="eyebrow mt-4 inline-block rounded-full border border-brand-border px-2.5 py-1 text-brand-primary dark:border-white/15">
-                {ROLE_LABEL[profile.role]}
-              </span>
-            )}
-
-            <div className="mt-4 border-t border-brand-border pt-4 dark:border-white/10">
-              <button
-                type="button"
-                onClick={async () => {
-                  await logEvent("logout", "sessao", userEmail);
-                  if (AVESTAID_ENABLED) {
-                    await avestaId.signOut();
-                    window.location.href = "/"; // re-boot: AuthProvider will redirect to the AvestaID portal
-                    return;
-                  }
-                  supabase.auth.signOut();
-                }}
-                className="btn-ghost w-full py-2 text-sm"
-              >
-                Sair
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       {previewFile && <PreviewModal file={previewFile} onClose={() => setPreviewFile(null)} />}

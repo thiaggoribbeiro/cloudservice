@@ -37,7 +37,7 @@ export function RenameDialog({
 
   return (
     <Modal title={title} onClose={onClose}>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-gutter-md">
         <input
           autoFocus
           type="text"
@@ -45,9 +45,9 @@ export function RenameDialog({
           onChange={(e) => setName(e.target.value)}
           className="field-input"
         />
-        {error && <p className="text-sm text-brand-primary">{error}</p>}
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <button type="button" onClick={onClose} className="btn-ghost w-full border-transparent sm:w-auto">
+        {error && <p role="alert" className="font-body text-body-sm text-light-error">{error}</p>}
+        <div className="mt-2 flex flex-col-reverse gap-gutter-sm sm:flex-row sm:justify-end">
+          <button type="button" onClick={onClose} className="btn-ghost w-full sm:w-auto">
             Cancelar
           </button>
           <button type="submit" disabled={mutation.isPending} className="btn-primary w-full sm:w-auto">
