@@ -142,7 +142,12 @@ export function HomeView({ ownerId }: { ownerId: string }) {
                       </div>
                       <div className="file-list">
                         {filteredFiles.map((file) => (
-                          <div key={file.id} className="file-row" onDoubleClick={() => openFile(file)}>
+                          <div
+                            key={file.id}
+                            className="file-row"
+                            onClick={isPreviewable(file.mime_type) ? () => openFile(file) : undefined}
+                            onDoubleClick={isPreviewable(file.mime_type) ? undefined : () => openFile(file)}
+                          >
                             <FileTypeIcon name={file.name} mimeType={file.mime_type} className="h-9 w-9 shrink-0" />
                             <span className="min-w-0 flex-1 truncate font-body text-body-md text-light-on-surface">
                               {file.name}

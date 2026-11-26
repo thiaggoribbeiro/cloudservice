@@ -173,9 +173,9 @@ const GRID_COLUMNS: Record<Exclude<ViewMode, "details">, string> = {
   photos: "grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-gutter-md",
 };
 
-// One tile in any of the grid views. Folders open on click (same as the
-// details list); files open on double-click, except images in "Fotos",
-// where a single click opens the viewer - that's what browsing photos is.
+// One tile in any of the grid views. Folders and previewable files (PDFs,
+// images) open on a single click; anything else downloads, so it stays
+// behind a deliberate double-click.
 function GridTile({
   mode,
   name,
@@ -650,7 +650,7 @@ export function FileGrid({
           onCloseMenu={() => setOpenMenuId(null)}
           onToggleFavorite={actions.onToggleFavorite}
           onActivate={() => openFile(file)}
-          activateOnClick={mode === "photos" && image}
+          activateOnClick={isPreviewable(file.mime_type)}
           actions={actions}
         />
       );
@@ -795,7 +795,14 @@ export function FileGrid({
           const isFavorited = actions.isFavorited;
 
           return (
-            <div key={file.id} className="file-row" onDoubleClick={() => openFile(file)}>
+            <div
+              key={file.id}
+              className="file-row"
+              // PDFs and images open in the viewer on a single click; other
+              // types download, so that stays behind a deliberate double-click.
+              onClick={isPreviewable(file.mime_type) ? () => openFile(file) : undefined}
+              onDoubleClick={isPreviewable(file.mime_type) ? undefined : () => openFile(file)}
+            >
               <FileTypeIcon name={file.name} mimeType={file.mime_type} className="h-9 w-9 shrink-0" />
               <span className="mr-2 flex min-w-0 flex-1 items-center sm:mr-3">
                 <span className="truncate font-body text-body-md text-light-on-surface">{file.name}</span>

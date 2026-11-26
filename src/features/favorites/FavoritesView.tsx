@@ -108,9 +108,8 @@ export function FavoritesView({ userId, userRole }: { userId: string; userRole: 
                   <div
                     key={entry.favoriteId}
                     className="file-row group"
-                    onDoubleClick={() =>
-                      isPreviewable(entry.file.mime_type) ? setPreview(entry.file) : downloadFile(entry.file)
-                    }
+                    onClick={isPreviewable(entry.file.mime_type) ? () => setPreview(entry.file) : undefined}
+                    onDoubleClick={isPreviewable(entry.file.mime_type) ? undefined : () => downloadFile(entry.file)}
                   >
                     <FileTypeIcon name={entry.file.name} mimeType={entry.file.mime_type} className="h-9 w-9 shrink-0" />
                     <span className="min-w-0 flex-1 truncate font-body text-body-md text-light-on-surface">
