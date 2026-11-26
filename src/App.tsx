@@ -13,6 +13,7 @@ import { MembersView } from "./features/members/MembersView";
 import { RepositoriesView } from "./features/repositories/RepositoriesView";
 import { EventLogView } from "./features/eventLog/EventLogView";
 import { CadastroUpdateModal } from "./components/ui/CadastroUpdateModal";
+import { WhatsNewDialog, shouldShowWhatsNew } from "./components/ui/WhatsNew";
 import type { CreateActionTarget, Folder, ViewSelection } from "./types/domain";
 
 function App() {
@@ -31,6 +32,9 @@ function App() {
   const [sharedResetKey, setSharedResetKey] = useState(0);
   const [favoritesResetKey, setFavoritesResetKey] = useState(0);
   const [navOpen, setNavOpen] = useState(false);
+  // "Novidades" shows on every entry into the app (each load), unless the
+  // person ticked "Não mostrar novamente" for this edition.
+  const [showWhatsNew, setShowWhatsNew] = useState(shouldShowWhatsNew);
   const lastUserId = useRef<string | null | undefined>(undefined);
 
   const isGuest = profile?.role === "guest";
@@ -180,6 +184,8 @@ function App() {
         )}
         </main>
       </div>
+
+      {showWhatsNew && <WhatsNewDialog onClose={() => setShowWhatsNew(false)} />}
     </div>
   );
 }
