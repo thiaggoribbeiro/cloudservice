@@ -4,7 +4,7 @@ import type { Folder, FileRow, UserRole } from "../../types/domain";
 import { formatBytes, isPreviewable, formatRelativeTime } from "../../lib/format";
 import { FileTypeIcon } from "../../components/ui/FileTypeIcon";
 import { downloadFile, downloadFolder, renameFile, moveFile } from "./fileApi";
-import { renameFolder, moveFolder, toggleFolderLock, getFolderSize } from "../folders/folderApi";
+import { renameFolder, moveFolder, toggleFolderLock, getFolderSize, getFoldersLastModified } from "../folders/folderApi";
 import { softDeleteFolder, softDeleteFile } from "../trash/trashApi";
 import {
   addFavoriteFile,
@@ -208,6 +208,7 @@ export function FileGrid({
     queryClient.invalidateQueries({ queryKey: ["folderChildren", currentFolderId] });
     queryClient.invalidateQueries({ queryKey: ["files", currentFolderId] });
     queryClient.invalidateQueries({ queryKey: ["storageUsage"] });
+    queryClient.invalidateQueries({ queryKey: ["folderLastModified"] });
   }
 
   const deleteFolderMutation = useMutation({
@@ -226,6 +227,18 @@ export function FileGrid({
 
   const { data: favoriteIds } = useFavoriteIds(currentUserId);
   const { data: displayNames } = useDisplayNames();
+
+  // A folder's "Modificado por/Modificado" is the latest change anywhere
+  // inside it, not the folder row's own stamp. If the lookup fails (e.g.
+  // the database function isn't deployed yet) we fall back to the row.
+  const folderIds = folders.map((folder) => folder.id);
+  const { data: folderLastModified } = useQuery({
+    queryKey: ["folderLastModified", folderIds],
+    queryFn: () => getFoldersLastModified(folderIds),
+    enabled: folderIds.length > 0,
+    staleTime: 30_000,
+    retry: false,
+  });
 
   function invalidateFavorites() {
     queryClient.invalidateQueries({ queryKey: ["favoriteIds", currentUserId] });
@@ -275,6 +288,7 @@ export function FileGrid({
       <div className="file-list">
         {folders.map((folder) => {
           const isFavorited = !!favoriteIds?.folderIds.has(folder.id);
+          const lastModified = folderLastModified?.get(folder.id);
           const isDownloading =
             downloadFolderMutation.isPending && downloadFolderMutation.variables?.id === folder.id;
 
@@ -335,10 +349,10 @@ export function FileGrid({
               </div>
 
               <span className="hidden w-32 shrink-0 truncate text-right font-body text-body-sm text-light-on-surface-variant lg:block">
-                {modifiedByLabel(folder.updated_by)}
+                {modifiedByLabel(lastModified ? lastModified.updatedBy : folder.updated_by)}
               </span>
               <span className="mono-tag hidden w-28 shrink-0 text-right text-[12px] text-light-on-surface-variant sm:block">
-                {formatRelativeTime(folder.updated_at)}
+                {formatRelativeTime(lastModified?.updatedAt ?? folder.updated_at)}
               </span>
               <FolderSizeCell folderId={folder.id} />
 

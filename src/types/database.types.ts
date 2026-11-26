@@ -398,6 +398,14 @@ export type Database = {
         }[]
       }
       get_folder_size: { Args: { p_folder_id: string }; Returns: number }
+      get_folders_last_modified: {
+        Args: { p_folder_ids: string[] }
+        Returns: {
+          folder_id: string
+          last_updated_at: string
+          last_updated_by: string | null
+        }[]
+      }
       get_repository_usage: {
         Args: { p_repository_id: string }
         Returns: {

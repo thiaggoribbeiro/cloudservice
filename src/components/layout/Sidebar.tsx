@@ -145,6 +145,7 @@ export function Sidebar({
     queryClient.invalidateQueries({ queryKey: ["files"] });
     queryClient.invalidateQueries({ queryKey: ["storageUsage"] });
     queryClient.invalidateQueries({ queryKey: ["repositoryUsage"] });
+    queryClient.invalidateQueries({ queryKey: ["folderLastModified"] });
   }
 
   async function handleFilesSelected(fileList: FileList) {

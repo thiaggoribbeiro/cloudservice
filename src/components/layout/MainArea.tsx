@@ -35,6 +35,7 @@ export function MainArea({
     queryClient.invalidateQueries({ queryKey: ["files", currentFolderId] });
     queryClient.invalidateQueries({ queryKey: ["storageUsage"] });
     queryClient.invalidateQueries({ queryKey: ["repositoryUsage"] });
+    queryClient.invalidateQueries({ queryKey: ["folderLastModified"] });
   }
 
   return (

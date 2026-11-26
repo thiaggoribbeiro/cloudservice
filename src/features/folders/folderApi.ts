@@ -107,3 +107,18 @@ export async function getFolderSize(folderId: string): Promise<number> {
   if (error) throw error;
   return data ?? 0;
 }
+
+export type FolderLastModified = { updatedAt: string; updatedBy: string | null };
+
+// Most recent change anywhere inside each folder (itself, any subfolder,
+// any file at any depth) - one batched call for every folder row on screen.
+export async function getFoldersLastModified(folderIds: string[]): Promise<Map<string, FolderLastModified>> {
+  const result = new Map<string, FolderLastModified>();
+  if (folderIds.length === 0) return result;
+  const { data, error } = await supabase.rpc("get_folders_last_modified", { p_folder_ids: folderIds });
+  if (error) throw error;
+  for (const row of data ?? []) {
+    result.set(row.folder_id, { updatedAt: row.last_updated_at, updatedBy: row.last_updated_by });
+  }
+  return result;
+}
